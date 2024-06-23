@@ -1,0 +1,149 @@
+import reflex as rx
+from smartnotes.components.chat import chat
+
+
+def test():
+    return rx.fragment(
+        rx.color_mode.button(position="top-right"),
+        rx.el.script(src="https://cdn.tailwindcss.com"),
+        rx.el.link(
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+            rel="stylesheet",
+        ),
+        # rx.el.style(
+        #     "body {\n            font-family: 'Inter', sans-serif;\n        }",
+        # ),
+        rx.flex(
+            sidebar(),
+            main_content(),
+            display="flex",
+            height="100vh",
+        ),
+    )
+
+
+def avatar(src, alt, height, width, margin_right=None):
+    return rx.image(
+        src=src,
+        alt=alt,
+        border_radius="9999px",
+        height=height,
+        width=width,
+        margin_right=margin_right,
+    )
+
+
+def contact(name, message):
+    return rx.box(
+        rx.flex(
+            avatar(
+                src="https://placehold.co/40x40",
+                alt="Contact avatar",
+                height="2.5rem",
+                width="2.5rem",
+                margin_right="0.75rem",
+            ),
+            rx.box(
+                rx.el.h3(name, font_weight="600"),
+                rx.text(
+                    message,
+                    font_size="0.875rem",
+                    line_height="1.25rem",
+                    color=rx.color("gray", 10),
+                ),
+            ),
+            display="flex",
+            align_items="center",
+        ),
+        cursor="pointer",
+        _hover={"background-color": rx.color("gray", 3)},
+        padding="1rem",
+    )
+
+
+def top_bar():
+    return rx.box(
+        rx.flex(
+            rx.image(
+                src="https://placehold.co/100x40",
+                alt="Chat app logo",
+                height="2.5rem",
+            ),
+            rx.flex(
+                avatar(
+                    src="https://placehold.co/40x40",
+                    alt="User avatar",
+                    height="2rem",
+                    width="2rem",
+                ),
+                display="flex",
+                align_items="center",
+            ),
+            display="flex",
+            align_items="center",
+            justify_content="space-between",
+        ),
+        border_bottom_width="1px",
+        padding="1rem",
+    )
+
+
+def search_box():
+    return rx.box(
+        rx.el.input(
+            type="text",
+            placeholder="Search conversations",
+            _focus={
+                "--ring-color": rx.color("accent", 10),
+                "outline-style": "none",
+                "box-shadow": "var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color)",
+            },
+            padding_left="2.5rem",
+            width="100%",
+            border_radius="0.5rem",
+            padding_top="0.5rem",
+            padding_bottom="0.5rem",
+            padding_right="1rem",
+            border_width="1px",
+        ),
+        position="relative",
+        padding="1rem",
+    )
+
+
+def sidebar():
+    return rx.box(
+        rx.logo(),
+        search_box(),
+        rx.box(
+            contact("John Doe", "Hello, how are you?"),
+            contact("Jane Smith", "Sure, let's meet tomorrow"),
+            contact("Alice Johnson", "Thanks for the update!"),
+            overflow_y="auto",
+        ),
+        width="25%",
+        style={"@media (min-width: 1024px)": {"display": "block"}},
+        display="none",
+        background_color=rx.color("gray", 1),
+        box_shadow="0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+    )
+
+def main_content():
+    return rx.flex(
+        rx.center(chat(), flex="1 1 0%", background_color=rx.color("gray", 1), padding="1rem"),
+        flex="1 1 0%",
+        flex_direction="column",
+        display="flex",
+    )
+
+
+def icon_button(margin_left=None):
+    return rx.el.button(
+        padding="0.5rem",
+        _hover={"background-color": rx.color("gray", 3)},
+        border_radius="9999px",
+        margin_left=margin_left,
+    )
+
+app = rx.App()
+app.add_page(test, route="/")
