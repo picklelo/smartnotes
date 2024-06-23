@@ -145,5 +145,5 @@ def icon_button(margin_left=None):
         margin_left=margin_left,
     )
 
-app = rx.App()
+app = rx.App(theme=rx.theme(accent_color="sky"))
 app.add_page(test, route="/")
