@@ -69,9 +69,10 @@ class AnthropicClient(LLM):
             The response from the model.
         """
         system_messages = [m for m in messages if m.role == "system"]
-        messages = [m for m in messages if isinstance(m, UserMessage) or isinstance(m, AIMessage)]
+        print("messages", messages)
+        messages = [m for m in messages if m.role in ["user", "assistant"]]
         system = system_messages[-1].content if system_messages else None
-        breakpoint()
+        print("system", system)
         return (
             (
                 await self.client.messages.create(
@@ -94,9 +95,11 @@ class AnthropicClient(LLM):
         Returns:
             An async generator yielding the response from the model.
         """
+        print("messages", messages)
         system_messages = [m for m in messages if m.role == "system"]
-        messages = [m for m in messages if m.role in ["user", "ai"]]
-        system = system_messages[-1].content if system_messages else None
+        messages = [m for m in messages if m.role in ["user", "assistant"]]
+        system = system_messages[-1].content if system_messages else ""
+        print("system", system)
         async with self.client.messages.stream(
             max_tokens=4096,
             messages=self.format_messages(messages),

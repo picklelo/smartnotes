@@ -1,19 +1,41 @@
 import reflex as rx
 from smartnotes.ai.llm import llm
-from smartnotes.ai.message import Message, SystemMessage, UserMessage, AIMessage
+from smartnotes.ai.message import Conversation, Message, SystemMessage, UserMessage, AIMessage
+from sqlmodel import select
 
 class ChatState(rx.State):
+    conversation: Conversation = Conversation(name="Chat")
     messages: list[Message] = [
         SystemMessage(content="You are a helpful assistant."),
     ]
 
+    async def on_load(self):
+        # Get the most recent conversation.
+        with rx.session() as session:
+            self.conversation = session.exec(select(Conversation).order_by(Conversation.id.desc())).first()
+            if self.conversation is None:
+                self.conversation = Conversation(name="Chat")
+                session.add(self.conversation)
+                session.commit()
+                session.refresh(self.conversation)
+            else:
+                # Load the conversation messages.
+                self.messages = session.exec(select(Message).filter(Message.conversation_id == self.conversation.id).order_by(Message.id)).all()
+
     async def process_message(self, data: dict[str, str]):
         message = data["user-input"]
-        self.messages.append(UserMessage(content=message))
-        self.messages.append(AIMessage(content=""))
+        self.messages.append(UserMessage(content=message, conversation_id=self.conversation.id))
+        self.messages.append(AIMessage(content="", conversation_id=self.conversation.id))
+        print(self.messages)
         async for chunk in llm.stream_chat_response(self.messages):
             self.messages[-1].content += chunk
             yield
+        with rx.session() as session:
+            session.add(self.messages[-2])
+            session.add(self.messages[-1])
+            session.commit()
+            session.refresh(self.messages[-2])
+            session.refresh(self.messages[-1])
 
 
 def common_button(icon, color, hover_color):
@@ -86,7 +108,7 @@ def header_section():
             background_image="background-image",
         ),
         rx.el.h1(
-            "Futuristic Chat",
+            ChatState.conversation.name,
             font_size="1.25rem",
             line_height="1.75rem",
             color=rx.color("gray", 11),
@@ -151,6 +173,7 @@ def input_section():
             background_color=rx.color("gray", 1),
             padding="1rem",
             on_submit=ChatState.process_message,
+            reset_on_submit=True,
         )
     )
 
@@ -169,4 +192,5 @@ def chat():
         flex_direction="column",
         background_image="background-image",
         display="flex",
+        on_mount=ChatState.on_load,
     )
