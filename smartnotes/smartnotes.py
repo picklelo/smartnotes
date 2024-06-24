@@ -95,7 +95,7 @@ def top_bar():
 
 
 def search_box():
-    return rx.box(
+    return rx.hstack(
         rx.el.input(
             type="text",
             placeholder="Search conversations",
@@ -112,6 +112,14 @@ def search_box():
             padding_right="1rem",
             border_width="1px",
         ),
+        rx.button(
+            rx.icon(
+                "plus"
+            ),
+            variant="outline",
+            on_click=ChatState.new_conversation,
+        ),
+        align="center",
         position="relative",
         padding="1rem",
     )
@@ -129,10 +137,6 @@ def sidebar():
             overflow_y="auto",
         ),
         rx.spacer(),
-        rx.button(
-            "New Chat",
-            on_click=ChatState.new_conversation,
-        ),
         width="25%",
         style={"@media (min-width: 1024px)": {"display": "block"}},
         display="none",

@@ -5,6 +5,10 @@ from sqlmodel import select
 
 DEFAULT_CONVERSATIION_NAME = "Chat"
 
+@rx.memo
+def markdown(content: str):
+    return rx.markdown(content)
+
 class ChatState(rx.State):
     conversations: list[Conversation] = []
     current_conversation: Conversation = Conversation(name=DEFAULT_CONVERSATIION_NAME)
@@ -16,7 +20,7 @@ class ChatState(rx.State):
         if self.current_conversation.name != DEFAULT_CONVERSATIION_NAME:
             return
         first_message = self.messages[0].content
-        prompt = f"""Given the following user's first message to this conversation, give it a short, succinct title: {first_message}"""
+        prompt = f"""Given the following user's first message to this conversation, give it a short, succinct title: {first_message}.\n Include only the title, nothing else."""
         response = await llm.get_chat_response([UserMessage(content=prompt)])
         with rx.session() as session:
             self.current_conversation.name = response
@@ -98,7 +102,7 @@ def chat_message(message: Message):
                 background_color=bg_color,
                 padding_left="1rem",
                 padding_right="1rem",
-                max_width="32rem",
+                max_width="65%",
                 box_shadow="0 1px 2px 0 rgba(0, 0, 0, 0.05)",
                 padding_top="0.5rem",
                 padding_bottom="0.5rem",
