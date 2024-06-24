@@ -9,6 +9,7 @@ class Conversation(rx.Model, table=True):
         sa_column=Column(DateTime(timezone=True), server_default=func.now()),
     )
 
+
 class Message(rx.Model, table=True):
     """A message to send to the agent."""
 
@@ -20,17 +21,22 @@ class Message(rx.Model, table=True):
     )
     conversation_id: int | None = Field(default=None, foreign_key="conversation.id")
 
+
 def UserMessage(**kwargs):
     return Message(role="user", **kwargs)
+
 
 def SystemMessage(**kwargs):
     return Message(role="system", **kwargs)
 
+
 def AIMessage(**kwargs):
     return Message(role="assistant", **kwargs)
 
+
 def ToolMessage(**kwargs):
     return Message(role="tool", **kwargs)
+
 
 # class UserMessage(Message):
 #     """A message from the user."""

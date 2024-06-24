@@ -1,13 +1,21 @@
 import reflex as rx
 from smartnotes.ai.llm import llm
-from smartnotes.ai.message import Conversation, Message, SystemMessage, UserMessage, AIMessage
+from smartnotes.ai.message import (
+    Conversation,
+    Message,
+    SystemMessage,
+    UserMessage,
+    AIMessage,
+)
 from sqlmodel import select
 
 DEFAULT_CONVERSATIION_NAME = "Chat"
 
+
 @rx.memo
 def markdown(content: str):
     return rx.markdown(content)
+
 
 class ChatState(rx.State):
     conversations: list[Conversation] = []
@@ -31,7 +39,11 @@ class ChatState(rx.State):
     def select_conversation(self, conversation_id):
         with rx.session() as session:
             self.current_conversation = session.get(Conversation, conversation_id)
-            self.messages = session.exec(select(Message).filter(Message.conversation_id == self.current_conversation.id).order_by(Message.id)).all()
+            self.messages = session.exec(
+                select(Message)
+                .filter(Message.conversation_id == self.current_conversation.id)
+                .order_by(Message.id)
+            ).all()
 
     def new_conversation(self):
         with rx.session() as session:
@@ -40,12 +52,18 @@ class ChatState(rx.State):
             session.commit()
             session.refresh(self.conversations[-1])
             self.current_conversation = self.conversations[-1]
-            self.messages = session.exec(select(Message).filter(Message.conversation_id == self.current_conversation.id).order_by(Message.id)).all()
+            self.messages = session.exec(
+                select(Message)
+                .filter(Message.conversation_id == self.current_conversation.id)
+                .order_by(Message.id)
+            ).all()
 
     async def on_load(self):
         # Get the most recent conversation.
         with rx.session() as session:
-            self.conversations = session.exec(select(Conversation).order_by(Conversation.id.desc())).all()
+            self.conversations = session.exec(
+                select(Conversation).order_by(Conversation.id.desc())
+            ).all()
             if len(self.conversations) == 0:
                 self.conversations.append(Conversation(name="Chat"))
                 session.add(self.conversations[0])
@@ -55,8 +73,12 @@ class ChatState(rx.State):
 
     async def process_message(self, data: dict[str, str]):
         message = data["user-input"]
-        self.messages.append(UserMessage(content=message, conversation_id=self.current_conversation.id))
-        self.messages.append(AIMessage(content="", conversation_id=self.current_conversation.id))
+        self.messages.append(
+            UserMessage(content=message, conversation_id=self.current_conversation.id)
+        )
+        self.messages.append(
+            AIMessage(content="", conversation_id=self.current_conversation.id)
+        )
         print(self.messages)
         async for chunk in llm.stream_chat_response(self.messages):
             self.messages[-1].content += chunk
@@ -97,7 +119,12 @@ def chat_message(message: Message):
         should_show,
         rx.flex(
             rx.box(
-                rx.markdown(message.content, color=rx.color("gray", 11), font_size="0.875rem", line_height="1.25rem"),
+                rx.markdown(
+                    message.content,
+                    color=rx.color("gray", 11),
+                    font_size="0.875rem",
+                    line_height="1.25rem",
+                ),
                 border_radius="1rem",
                 background_color=bg_color,
                 padding_left="1rem",
@@ -110,17 +137,14 @@ def chat_message(message: Message):
             ),
             display="flex",
             justify_content=justify,
-        )
+        ),
     )
 
 
 def chat_container():
     return rx.scroll_area(
         rx.flex(
-            rx.foreach(
-                ChatState.messages,
-                lambda message: chat_message(message)
-            ),
+            rx.foreach(ChatState.messages, lambda message: chat_message(message)),
             id="chat-container",
             overflow_y="auto",
             flex="1 1 0%",

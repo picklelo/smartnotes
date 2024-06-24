@@ -79,14 +79,16 @@ class AnthropicClient(LLM):
                     max_tokens=4096,
                     messages=self.format_messages(messages),
                     model=self.model,
-                    system=system
+                    system=system,
                 )
             )
             .content[0]
             .text
         )
 
-    async def stream_chat_response(self, messages: list[Message]) -> AsyncGenerator[str, None]:
+    async def stream_chat_response(
+        self, messages: list[Message]
+    ) -> AsyncGenerator[str, None]:
         """Stream the response from the chat model.
 
         Args:

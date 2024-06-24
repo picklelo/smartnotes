@@ -1,21 +1,23 @@
 import reflex as rx
 from smartnotes.components.chat import chat, ChatState
+from reflex_resizable_panels import resizable_panels as rzp
 
 
 def test():
     return rx.fragment(
         rx.color_mode.button(position="top-right"),
-        rx.el.script(src="https://cdn.tailwindcss.com"),
-        rx.el.link(
-            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
-            rel="stylesheet",
-        ),
-        # rx.el.style(
-        #     "body {\n            font-family: 'Inter', sans-serif;\n        }",
-        # ),
-        rx.flex(
-            sidebar(),
-            main_content(),
+        rzp.group(
+            rzp.panel(
+                sidebar(),
+                min_size=25,
+                default_size=25,
+            ),
+            rzp.handle(),
+            rzp.panel(
+                main_content(),
+                min_size=50,
+            ),
+            direction="horizontal",
             display="flex",
             height="100vh",
         ),
@@ -113,9 +115,7 @@ def search_box():
             border_width="1px",
         ),
         rx.button(
-            rx.icon(
-                "plus"
-            ),
+            rx.icon("plus"),
             variant="outline",
             on_click=ChatState.new_conversation,
         ),
@@ -130,14 +130,10 @@ def sidebar():
         rx.logo(),
         search_box(),
         rx.box(
-            rx.foreach(
-                ChatState.conversations,
-                conversation
-            ),
+            rx.foreach(ChatState.conversations, conversation),
             overflow_y="auto",
         ),
         rx.spacer(),
-        width="25%",
         style={"@media (min-width: 1024px)": {"display": "block"}},
         display="none",
         background_color=rx.color("gray", 1),
@@ -145,9 +141,12 @@ def sidebar():
         height="100vh",
     )
 
+
 def main_content():
     return rx.flex(
-        rx.center(chat(), flex="1 1 0%", background_color=rx.color("gray", 1), padding="1rem"),
+        rx.center(
+            chat(), flex="1 1 0%", background_color=rx.color("gray", 1), padding="1rem"
+        ),
         flex="1 1 0%",
         flex_direction="column",
         display="flex",
@@ -161,6 +160,7 @@ def icon_button(margin_left=None):
         border_radius="9999px",
         margin_left=margin_left,
     )
+
 
 app = rx.App(theme=rx.theme(accent_color="sky"))
 app.add_page(test, route="/")
