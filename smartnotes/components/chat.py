@@ -3,29 +3,56 @@ from smartnotes.ai.llm import llm
 from smartnotes.ai.message import Conversation, Message, SystemMessage, UserMessage, AIMessage
 from sqlmodel import select
 
+DEFAULT_CONVERSATIION_NAME = "Chat"
+
 class ChatState(rx.State):
-    conversation: Conversation = Conversation(name="Chat")
+    conversations: list[Conversation] = []
+    current_conversation: Conversation = Conversation(name=DEFAULT_CONVERSATIION_NAME)
     messages: list[Message] = [
         SystemMessage(content="You are a helpful assistant."),
     ]
 
+    async def name_conversation(self):
+        if self.current_conversation.name != DEFAULT_CONVERSATIION_NAME:
+            return
+        first_message = self.messages[0].content
+        prompt = f"""Given the following user's first message to this conversation, give it a short, succinct title: {first_message}"""
+        response = await llm.get_chat_response([UserMessage(content=prompt)])
+        with rx.session() as session:
+            self.current_conversation.name = response
+            session.add(self.current_conversation)
+            session.commit()
+            session.refresh(self.current_conversation)
+
+    def select_conversation(self, conversation_id):
+        with rx.session() as session:
+            self.current_conversation = session.get(Conversation, conversation_id)
+            self.messages = session.exec(select(Message).filter(Message.conversation_id == self.current_conversation.id).order_by(Message.id)).all()
+
+    def new_conversation(self):
+        with rx.session() as session:
+            self.conversations.append(Conversation(name="Chat"))
+            session.add(self.conversations[-1])
+            session.commit()
+            session.refresh(self.conversations[-1])
+            self.current_conversation = self.conversations[-1]
+            self.messages = session.exec(select(Message).filter(Message.conversation_id == self.current_conversation.id).order_by(Message.id)).all()
+
     async def on_load(self):
         # Get the most recent conversation.
         with rx.session() as session:
-            self.conversation = session.exec(select(Conversation).order_by(Conversation.id.desc())).first()
-            if self.conversation is None:
-                self.conversation = Conversation(name="Chat")
-                session.add(self.conversation)
+            self.conversations = session.exec(select(Conversation).order_by(Conversation.id.desc())).all()
+            if len(self.conversations) == 0:
+                self.conversations.append(Conversation(name="Chat"))
+                session.add(self.conversations[0])
                 session.commit()
-                session.refresh(self.conversation)
-            else:
-                # Load the conversation messages.
-                self.messages = session.exec(select(Message).filter(Message.conversation_id == self.conversation.id).order_by(Message.id)).all()
+                session.refresh(self.conversations[0])
+            self.select_conversation(self.conversations[0].id)
 
     async def process_message(self, data: dict[str, str]):
         message = data["user-input"]
-        self.messages.append(UserMessage(content=message, conversation_id=self.conversation.id))
-        self.messages.append(AIMessage(content="", conversation_id=self.conversation.id))
+        self.messages.append(UserMessage(content=message, conversation_id=self.current_conversation.id))
+        self.messages.append(AIMessage(content="", conversation_id=self.current_conversation.id))
         print(self.messages)
         async for chunk in llm.stream_chat_response(self.messages):
             self.messages[-1].content += chunk
@@ -36,6 +63,7 @@ class ChatState(rx.State):
             session.commit()
             session.refresh(self.messages[-2])
             session.refresh(self.messages[-1])
+        await self.name_conversation()
 
 
 def common_button(icon, color, hover_color):
@@ -65,7 +93,7 @@ def chat_message(message: Message):
         should_show,
         rx.flex(
             rx.box(
-                rx.text(message.content, color=rx.color("gray", 11), font_size="0.875rem", line_height="1.25rem"),
+                rx.markdown(message.content, color=rx.color("gray", 11), font_size="0.875rem", line_height="1.25rem"),
                 border_radius="1rem",
                 background_color=bg_color,
                 padding_left="1rem",
@@ -83,18 +111,20 @@ def chat_message(message: Message):
 
 
 def chat_container():
-    return rx.flex(
-        rx.foreach(
-            ChatState.messages,
-            lambda message: chat_message(message)
-        ),
-        id="chat-container",
-        overflow_y="auto",
-        flex="1 1 0%",
-        gap="1rem",
-        display="flex",
-        flex_direction="column",
-        padding="1rem"
+    return rx.scroll_area(
+        rx.flex(
+            rx.foreach(
+                ChatState.messages,
+                lambda message: chat_message(message)
+            ),
+            id="chat-container",
+            overflow_y="auto",
+            flex="1 1 0%",
+            gap="1rem",
+            display="flex",
+            flex_direction="column",
+            padding="1rem",
+        )
     )
 
 
@@ -108,7 +138,7 @@ def header_section():
             background_image="background-image",
         ),
         rx.el.h1(
-            ChatState.conversation.name,
+            ChatState.current_conversation.name,
             font_size="1.25rem",
             line_height="1.75rem",
             color=rx.color("gray", 11),
@@ -188,7 +218,7 @@ def chat():
         box_shadow="0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
         border_radius="1rem",
         width="100%",
-        height="100%",
+        height="95vh",
         flex_direction="column",
         background_image="background-image",
         display="flex",

@@ -71,7 +71,7 @@ class AnthropicClient(LLM):
         system_messages = [m for m in messages if m.role == "system"]
         print("messages", messages)
         messages = [m for m in messages if m.role in ["user", "assistant"]]
-        system = system_messages[-1].content if system_messages else None
+        system = system_messages[-1].content if system_messages else ""
         print("system", system)
         return (
             (

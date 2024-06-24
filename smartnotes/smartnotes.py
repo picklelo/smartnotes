@@ -1,5 +1,5 @@
 import reflex as rx
-from smartnotes.components.chat import chat
+from smartnotes.components.chat import chat, ChatState
 
 
 def test():
@@ -33,7 +33,7 @@ def avatar(src, alt, height, width, margin_right=None):
     )
 
 
-def contact(name, message):
+def conversation(conversation):
     return rx.box(
         rx.flex(
             avatar(
@@ -44,9 +44,9 @@ def contact(name, message):
                 margin_right="0.75rem",
             ),
             rx.box(
-                rx.el.h3(name, font_weight="600"),
+                rx.el.h3(conversation.name, font_weight="600"),
                 rx.text(
-                    message,
+                    rx.moment(conversation.timestamp),
                     font_size="0.875rem",
                     line_height="1.25rem",
                     color=rx.color("gray", 10),
@@ -55,9 +55,15 @@ def contact(name, message):
             display="flex",
             align_items="center",
         ),
+        background_color=rx.cond(
+            ChatState.current_conversation.id == conversation.id,
+            rx.color("accent", 2),
+            rx.color("gray", 1),
+        ),
         cursor="pointer",
         _hover={"background-color": rx.color("gray", 3)},
         padding="1rem",
+        on_click=lambda: ChatState.select_conversation(conversation.id),
     )
 
 
@@ -112,20 +118,27 @@ def search_box():
 
 
 def sidebar():
-    return rx.box(
+    return rx.vstack(
         rx.logo(),
         search_box(),
         rx.box(
-            contact("John Doe", "Hello, how are you?"),
-            contact("Jane Smith", "Sure, let's meet tomorrow"),
-            contact("Alice Johnson", "Thanks for the update!"),
+            rx.foreach(
+                ChatState.conversations,
+                conversation
+            ),
             overflow_y="auto",
+        ),
+        rx.spacer(),
+        rx.button(
+            "New Chat",
+            on_click=ChatState.new_conversation,
         ),
         width="25%",
         style={"@media (min-width: 1024px)": {"display": "block"}},
         display="none",
         background_color=rx.color("gray", 1),
         box_shadow="0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+        height="100vh",
     )
 
 def main_content():

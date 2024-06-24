@@ -5,6 +5,9 @@ from sqlmodel import Column, DateTime, Field, func
 
 class Conversation(rx.Model, table=True):
     name: str
+    timestamp: datetime.datetime = Field(
+        sa_column=Column(DateTime(timezone=True), server_default=func.now()),
+    )
 
 class Message(rx.Model, table=True):
     """A message to send to the agent."""
