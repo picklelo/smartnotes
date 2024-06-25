@@ -8,6 +8,7 @@ from smartnotes.ai.message import (
     AIMessage,
 )
 from sqlmodel import select
+from smartnotes.components.file_context import ContextState
 
 DEFAULT_CONVERSATIION_NAME = "Chat"
 
@@ -73,14 +74,23 @@ class ChatState(rx.State):
 
     async def process_message(self, data: dict[str, str]):
         message = data["user-input"]
+        original_message = message
+
         self.messages.append(
             UserMessage(content=message, conversation_id=self.current_conversation.id)
         )
         self.messages.append(
             AIMessage(content="", conversation_id=self.current_conversation.id)
         )
-        print(self.messages)
-        async for chunk in llm.stream_chat_response(self.messages):
+        yield
+
+        # messages = [m.copy() for m in self.messages]
+        messages = self.messages.copy()
+        context_state = await self.get_state(ContextState)
+        if context_state.selected_files:
+            messages[-2] = UserMessage(content=f"{original_message}\n{context_state._get_context()}")
+
+        async for chunk in llm.stream_chat_response(messages):
             self.messages[-1].content += chunk
             yield
         with rx.session() as session:
@@ -92,7 +102,7 @@ class ChatState(rx.State):
         await self.name_conversation()
 
 
-def common_button(icon, color, hover_color):
+def common_button(icon, color, hover_color, **kwargs):
     return rx.el.button(
         rx.icon(icon),
         transition_property="color, background-color, border-color, text-decoration-color, fill, stroke",
@@ -100,6 +110,7 @@ def common_button(icon, color, hover_color):
         transition_duration="300ms",
         _hover={"color": hover_color},
         color=color,
+        **kwargs
     )
 
 
@@ -198,7 +209,7 @@ def input_section():
         rx.form(
             rx.flex(
                 common_button("paperclip", rx.color("gray", 8), rx.color("gray", 10)),
-                rx.el.input(
+                rx.text_area(
                     name="user-input",
                     type="text",
                     placeholder="Type your message...",
@@ -207,6 +218,10 @@ def input_section():
                         "outline-style": "none",
                         "box-shadow": "var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color)",
                     },
+                    auto_height=True,
+                    rows="1",
+                    min_height=0,
+                    enter_key_submit=True,
                     color=rx.color("gray", 11),
                     padding_left="1rem",
                     padding_right="1rem",
@@ -216,7 +231,9 @@ def input_section():
                     font_size="0.875rem",
                     line_height="1.25rem",
                     flex="1 1 0%",
-                    border_radius="9999px",
+                    # border_radius="var(--radius-4)",
+                    padding_x="1em",
+                    border_radius="20px",
                     background_color=rx.color("gray", 1),
                     padding_top="0.5rem",
                     padding_bottom="0.5rem",

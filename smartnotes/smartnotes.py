@@ -1,5 +1,7 @@
 import reflex as rx
-from smartnotes.components.chat import chat, ChatState
+from smartnotes.components.chat import chat, ChatState, common_button
+from smartnotes.components.file_context import file_context
+
 from reflex_resizable_panels import resizable_panels as rzp
 
 
@@ -8,7 +10,19 @@ def test():
         rx.color_mode.button(position="top-right"),
         rzp.group(
             rzp.panel(
-                sidebar(),
+                rzp.group(
+                    rzp.panel(
+                        sidebar(),
+                        min_size=50,
+                    ),
+                    rzp.handle(),
+                    rzp.panel(
+                        file_context(),
+                        default_size=25,
+                        min_size=10,
+                    ),
+                    direction="vertical",
+                ),
                 min_size=25,
                 default_size=25,
             ),
@@ -114,11 +128,16 @@ def search_box():
             padding_right="1rem",
             border_width="1px",
         ),
-        rx.button(
-            rx.icon("plus"),
-            variant="outline",
+        common_button(
+            "plus",
+            rx.color("accent", 8),
+            rx.color("accent", 10),
             on_click=ChatState.new_conversation,
         ),
+        # rx.button(
+        #     rx.icon("plus"),
+        #     variant="outline",
+        # ),
         align="center",
         position="relative",
         padding="1rem",
