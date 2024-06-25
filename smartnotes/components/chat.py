@@ -113,6 +113,15 @@ def common_button(icon, color, hover_color, **kwargs):
         **kwargs
     )
 
+@rx.memo
+def markdown(content: str):
+    return rx.markdown(
+        content,
+        color=rx.color("gray", 11),
+        font_size="0.875rem",
+        line_height="1.25rem",
+    )
+
 
 def chat_message(message: Message):
     bg_color = rx.cond(
@@ -130,12 +139,7 @@ def chat_message(message: Message):
         should_show,
         rx.flex(
             rx.box(
-                rx.markdown(
-                    message.content,
-                    color=rx.color("gray", 11),
-                    font_size="0.875rem",
-                    line_height="1.25rem",
-                ),
+                markdown(content=message.content),
                 border_radius="1rem",
                 background_color=bg_color,
                 padding_left="1rem",
