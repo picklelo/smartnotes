@@ -1,7 +1,7 @@
 import os
 from typing import AsyncGenerator
 
-from smartnotes.ai.message import Message, UserMessage, AIMessage
+from smartnotes.ai.message import Message
 
 
 class LLM:

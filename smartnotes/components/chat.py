@@ -48,16 +48,27 @@ class ChatState(rx.State):
 
     def new_conversation(self):
         with rx.session() as session:
-            self.conversations.append(Conversation(name="Chat"))
-            session.add(self.conversations[-1])
+            self.conversations.insert(0, Conversation(name="Chat"))
+            # self.conversations.append(Conversation(name="Chat"))
+            session.add(self.conversations[0])
             session.commit()
-            session.refresh(self.conversations[-1])
-            self.current_conversation = self.conversations[-1]
+            session.refresh(self.conversations[0])
+            self.current_conversation = self.conversations[0]
             self.messages = session.exec(
                 select(Message)
                 .filter(Message.conversation_id == self.current_conversation.id)
                 .order_by(Message.id)
             ).all()
+
+    def delete_conversation(self, conversation_id):
+        with rx.session() as session:
+            session.delete(Conversation, conversation_id)
+            session.commit()
+        self.conversations = [
+            c for c in self.conversations if c.id != conversation_id
+        ]
+        if len(self.conversations) == 0:
+            self.new_conversation()
 
     async def on_load(self):
         # Get the most recent conversation.
@@ -84,7 +95,6 @@ class ChatState(rx.State):
         )
         yield
 
-        # messages = [m.copy() for m in self.messages]
         messages = self.messages.copy()
         context_state = await self.get_state(ContextState)
         if context_state.selected_files:

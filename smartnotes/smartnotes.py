@@ -60,7 +60,7 @@ def conversation(conversation):
                 margin_right="0.75rem",
             ),
             rx.box(
-                rx.el.h3(conversation.name, font_weight="600"),
+                rx.el.h3(conversation.name, font_weight="600", color=rx.color("gray", 11)),
                 rx.text(
                     rx.moment(conversation.timestamp),
                     font_size="0.875rem",
@@ -134,10 +134,6 @@ def search_box():
             rx.color("accent", 10),
             on_click=ChatState.new_conversation,
         ),
-        # rx.button(
-        #     rx.icon("plus"),
-        #     variant="outline",
-        # ),
         align="center",
         position="relative",
         padding="1rem",
@@ -148,16 +144,15 @@ def sidebar():
     return rx.vstack(
         rx.logo(),
         search_box(),
-        rx.box(
+        rx.scroll_area(
             rx.foreach(ChatState.conversations, conversation),
-            overflow_y="auto",
         ),
-        rx.spacer(),
+        file_context(),
         style={"@media (min-width: 1024px)": {"display": "block"}},
         display="none",
         background_color=rx.color("gray", 1),
         box_shadow="0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-        height="100vh",
+        height="80%",
     )
 
 
