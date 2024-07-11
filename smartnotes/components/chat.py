@@ -21,9 +21,8 @@ def markdown(content: str):
 class ChatState(rx.State):
     conversations: list[Conversation] = []
     current_conversation: Conversation = Conversation(name=DEFAULT_CONVERSATIION_NAME)
-    messages: list[Message] = [
-        SystemMessage(content="You are a helpful assistant."),
-    ]
+    system_message: Message = SystemMessage(content="You are a helpful assistant.")
+    messages: list[Message] = []
 
     async def name_conversation(self):
         if self.current_conversation.name != DEFAULT_CONVERSATIION_NAME:
@@ -32,7 +31,7 @@ class ChatState(rx.State):
         prompt = f"""Given the following user's first message to this conversation, give it a short, succinct title: {first_message}.\n Include only the title, nothing else."""
         response = await llm.get_chat_response([UserMessage(content=prompt)])
         with rx.session() as session:
-            self.current_conversation.name = response
+            self.current_conversation.name = response.content
             session.add(self.current_conversation)
             session.commit()
             session.refresh(self.current_conversation)
@@ -100,10 +99,11 @@ class ChatState(rx.State):
         if context_state.selected_files:
             messages[-2] = UserMessage(content=f"{original_message}\n{context_state._get_context()}")
 
-        async for chunk in llm.stream_chat_response(messages):
-            self.messages[-1].content += chunk
+        async for ai_message in llm.stream_chat_response(messages, system=self.system_message):
+            self.messages[-1].content = ai_message.content
             yield
         with rx.session() as session:
+            print("adding messages", self.messages[-2], self.messages[-1])
             session.add(self.messages[-2])
             session.add(self.messages[-1])
             session.commit()

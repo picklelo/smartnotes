@@ -32,6 +32,13 @@ class Message(rx.Model, table=True):
     # The conversation ID the message belongs to.
     conversation_id: int | None = Field(default=None, foreign_key="conversation.id")
 
+    def to_llm_message(self) -> dict:
+        """Convert the message to a format that can be sent to the LLM."""
+        return {
+            "role": self.role,
+            "content": self.content,
+        } 
+
 def UserMessage(**kwargs):
     return Message(role="user", **kwargs)
 

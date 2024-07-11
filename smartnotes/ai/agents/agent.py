@@ -3,7 +3,8 @@ from smartnotes.ai.llm import LLM
 
 
 class Agent:
-    def __init__(self, llm: LLM):
+    def __init__(self, llm: LLM, initial_context=None):
+        
         self.llm = llm
 
     async def stream_response(self, messages: list[Message]):
