@@ -30,6 +30,7 @@ class Client:
                 line, buffer = buffer.split("\n", 1)
                 yield line + "\n"
 
+
 def to_llm_message(messages: list[message.Message]) -> list[dict]:
     """Convert the messages to a format that can be sent to the LLM.
 
@@ -41,6 +42,7 @@ def to_llm_message(messages: list[message.Message]) -> list[dict]:
     """
     return [m.to_llm_message() for m in messages]
 
+
 class AnthropicClient(Client):
     def __init__(
         self, model=os.getenv("ANTHROPIC_MODEL", "claude-3-5-sonnet-20240620")
@@ -49,6 +51,7 @@ class AnthropicClient(Client):
 
         self.client = AsyncAnthropic()
         self.model = model
+        self.maax_tokens = 4096
 
     async def get_chat_response(
         self,
@@ -67,7 +70,7 @@ class AnthropicClient(Client):
         content = (
             (
                 await self.client.messages.create(
-                    max_tokens=4096,
+                    max_tokens=self.max_tokens,
                     messages=to_llm_message(messages),
                     model=self.model,
                     system=system.content,
@@ -93,8 +96,6 @@ class AnthropicClient(Client):
         """
         system = system or message.SystemMessage(content="")
         ai_message = message.AIMessage(content="")
-        print(system)
-        print(to_llm_message(messages))
         async with self.client.messages.stream(
             max_tokens=4096,
             messages=to_llm_message(messages),

@@ -17,7 +17,7 @@ class ContextState(rx.State):
     def remove_file(self, filename):
         self.selected_files.remove(filename)
 
-    def _get_context(self):
+    def _get_context(self) -> str:
         # Create a dict from filename to content.
         contents = {
             filename: open(filename).read()

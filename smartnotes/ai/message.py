@@ -5,6 +5,7 @@ from sqlmodel import Column, DateTime, Field, func
 
 class Conversation(rx.Model, table=True):
     """A conversation between the user and the AI."""
+
     # The name of the conversation.
     name: str
 
@@ -13,8 +14,10 @@ class Conversation(rx.Model, table=True):
         sa_column=Column(DateTime(timezone=True), server_default=func.now()),
     )
 
+
 class Message(rx.Model, table=True):
     """A message to send to the agent."""
+
     # The role of the message (user, system, AI, tool).
     role: str
 
@@ -37,19 +40,24 @@ class Message(rx.Model, table=True):
         return {
             "role": self.role,
             "content": self.content,
-        } 
+        }
+
 
 def UserMessage(**kwargs):
     return Message(role="user", **kwargs)
 
+
 def SystemMessage(**kwargs):
     return Message(role="system", **kwargs)
+
 
 def AIMessage(**kwargs):
     return Message(role="assistant", **kwargs)
 
+
 def ToolMessage(**kwargs):
     return Message(role="tool", **kwargs)
+
 
 # class UserMessage(Message):
 #     """A message from the user."""

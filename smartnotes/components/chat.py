@@ -9,9 +9,9 @@ from smartnotes.ai.message import (
 )
 from sqlmodel import select
 from smartnotes.components.file_context import ContextState
+from smartnotes.ai.agents import agent
 
 DEFAULT_CONVERSATIION_NAME = "Chat"
-
 
 @rx.memo
 def markdown(content: str):
@@ -21,15 +21,13 @@ def markdown(content: str):
 class ChatState(rx.State):
     conversations: list[Conversation] = []
     current_conversation: Conversation = Conversation(name=DEFAULT_CONVERSATIION_NAME)
-    system_message: Message = SystemMessage(content="You are a helpful assistant.")
     messages: list[Message] = []
 
     async def name_conversation(self):
         if self.current_conversation.name != DEFAULT_CONVERSATIION_NAME:
             return
-        first_message = self.messages[0].content
-        prompt = f"""Given the following user's first message to this conversation, give it a short, succinct title: {first_message}.\n Include only the title, nothing else."""
-        response = await llm.get_chat_response([UserMessage(content=prompt)])
+        convo_agent = agent.ConversationNameAgent(messages=self.messages)
+        response = await convo_agent.get_response()
         with rx.session() as session:
             self.current_conversation.name = response.content
             session.add(self.current_conversation)
@@ -84,8 +82,6 @@ class ChatState(rx.State):
 
     async def process_message(self, data: dict[str, str]):
         message = data["user-input"]
-        original_message = message
-
         self.messages.append(
             UserMessage(content=message, conversation_id=self.current_conversation.id)
         )
@@ -94,13 +90,10 @@ class ChatState(rx.State):
         )
         yield
 
-        messages = self.messages.copy()
         context_state = await self.get_state(ContextState)
-        if context_state.selected_files:
-            messages[-2] = UserMessage(content=f"{original_message}\n{context_state._get_context()}")
-
-        async for ai_message in llm.stream_chat_response(messages, system=self.system_message):
-            self.messages[-1].content = ai_message.content
+        context_agent = agent.ContextAgent(context_files=context_state._get_context())
+        async for message in context_agent.stream(self.messages):
+            self.messages[-1].content = message.content
             yield
         with rx.session() as session:
             print("adding messages", self.messages[-2], self.messages[-1])
