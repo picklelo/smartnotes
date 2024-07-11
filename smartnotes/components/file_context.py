@@ -3,6 +3,7 @@ import reflex as rx
 
 
 class ContextState(rx.State):
+    # selected_files: list[str] = [f"/Users/nikhil/Downloads/growth/{f}" for f in os.listdir("/Users/nikhil/Downloads/growth") if f.endswith(".md")]
     selected_files: list[str]
 
     def add_file(self, data: dict[str, str]):

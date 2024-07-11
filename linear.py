@@ -1,19 +1,32 @@
+from __future__ import annotations
 import httpx
 import os
 import reflex as rx
 
-class Project(rx.Base):
-    id: str
+class ProjectStatus(rx.Base):
     name: str
 
 class State(rx.Base):
     name: str
 
+class User(rx.Base):
+    name: str
+
+class Project(rx.Base):
+    # id: str | None
+    name: str
+    status: ProjectStatus | None
+    content: str | None
 class Issue(rx.Base):
-    id: str
-    title: str
+    identifier: str
+    assignee: User | None
+    title: str | None
     description: str | None
     state: State | None
+    createdAt: str | None
+    project: Project | None
+
+
 
 # Assuming LINEAR_API_KEY is set in your environment variables
 def make_request(data):
@@ -29,7 +42,9 @@ def make_request(data):
     return response.json()
 
 
-def get_issues(project_name):
+def get_issues(project_names):
+    if isinstance(project_names, str):
+        project_names = [project_names]
     cursor = None  # Initialize cursor
     issues = []
     while True:
@@ -42,16 +57,28 @@ def get_issues(project_name):
                     filter: {{
                         project: {{
                             name: {{
-                                eq: "{project_name}"
+                                in: {json.dumps(project_names)}
+                            }}
+                        }}
+                        state: {{
+                            name: {{
+                                nin: ["Canceled"]
                             }}
                         }}
                     }}
                 ) {{ 
                     nodes {{ 
-                        id 
+                        identifier
                         title
                         description
                         state {{
+                            name
+                        }}
+                        createdAt
+                        assignee {{
+                            name
+                        }}
+                        project {{
                             name
                         }}
                     }}
@@ -63,6 +90,7 @@ def get_issues(project_name):
             }}""",
             "variables": {"cursor": cursor},  # Pass cursor as a variable
         }
+        print(data)
         resp = make_request(data)
         print(resp)
         issues.extend([Issue.parse_obj(issue) for issue in resp["data"]["issues"]["nodes"]])
@@ -79,10 +107,28 @@ def get_all_projects():
         # Update the query to include a variable for the cursor
         data = {
             "query": f"""query GetProjects($cursor: String) {{
-                projects(after: $cursor, first: 50) {{ 
+                projects(
+                    after: $cursor, 
+                    first: 50,
+                    filter: {{
+                        status: {{
+                            name: {{
+                                nin: ["Canceled", "Completed", "Backlog"]
+                            }}
+                        }}
+                        initiatives: {{
+                            name: {{
+                                eq: "Flexgen"
+                            }}
+                        }} 
+                    }}
+                ) {{ 
                     nodes {{ 
-                        id 
                         name
+                        status {{
+                            name
+                        }}
+                        content
                     }}
                     pageInfo {{
                         endCursor
@@ -90,7 +136,7 @@ def get_all_projects():
                     }}
                 }}
             }}""",
-            "variables": {"cursor": cursor}  # Pass cursor as a variable
+            "variables": {"cursor": cursor},  # Pass cursor as a variable
         }
         resp = make_request(data)
         print(resp)
@@ -99,15 +145,30 @@ def get_all_projects():
         cursor = resp["data"]["projects"]["pageInfo"]["endCursor"]  # Update cursor for the next iteration
         if not has_next_page:
             break
-    return projects
+    # Get issues for each project
+    open_projects = [p for p in projects if p.status.name not in ["Canceled", "Completed", "Backlog", "Paused"]]
+    open_projects.sort(key=lambda x: x.status.name)
+    issues = get_issues([project.name for project in open_projects])
+    for project in open_projects:
+        if project.name in ["Open Source Bugs", "Templates and Recipes", "Core Graphing Improvements", "Reflex Web Performance"]:
+            continue
+        if project.status.name not in ["Paused"]:
+            project.issues = [issue for issue in issues if issue.project.name == project.name]
+        else:
+            print("Skipping issues for paused project", project.name)
+    return projects, open_projects
 
-issues = get_issues("Radix")
-print(len(issues))
+import json
+# issues = get_issues("Flexgen V0")
+# with open("context/linear-issues.json", "w") as f:
+#     f.write(json.dumps([issue.dict() for issue in issues], indent=2))
+# # print(json.dumps([issue.dict() for issue in issues], indent=2))
 
-# projects = get_all_projects()
-# print(projects)
-# print(len(projects))
-# print("\n".join([p.id for p in projects]))
-# resp = make_request(data)
-# print(resp)
-# print(len(resp))
+projects, open_projects = get_all_projects()
+print(projects)
+print(len(projects), len(open_projects))
+# Sort by status
+print(open_projects, len(open_projects))
+with open("context/linear-projects.json", "w") as f:
+    f.write(json.dumps([project.dict() for project in open_projects], indent=2))
+# print("\n".join([p.name for p in projects]))
