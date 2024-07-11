@@ -85,16 +85,19 @@ class ChatState(rx.State):
         self.messages.append(
             UserMessage(content=message, conversation_id=self.current_conversation.id)
         )
-        self.messages.append(
-            AIMessage(content="", conversation_id=self.current_conversation.id)
-        )
+        # self.messages.append(
+        #     AIMessage(content="", conversation_id=self.current_conversation.id)
+        # )
         yield
 
         context_state = await self.get_state(ContextState)
         context_agent = agent.ContextAgent(context_files=context_state._get_context())
         print("values")
         async for message in context_agent.stream(self.messages.copy()):
-            self.messages[-1].content = message.content
+            message.conversation_id = self.current_conversation.id
+            self.messages.append(message)
+
+            # self.messages[-1].content = message.content
             yield
         with rx.session() as session:
             print("adding messages", self.messages[-2], self.messages[-1])

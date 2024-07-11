@@ -107,7 +107,7 @@ class AnthropicClient(Client):
                 yield ai_message
 
     async def get_structured_response(
-        self, messages: dict, model: Type[rx.Base]
+        self, messages: dict, model: Type[rx.Base], system: message.SystemMessage | None = None
     ) -> Type[rx.Base]:
         """Get the structured response from the chat model.
 
@@ -118,7 +118,8 @@ class AnthropicClient(Client):
         Returns:
             The structured response from the model.
         """
-        system_prompt = f"""{messages[0]["content"]}
+        system = system or message.SystemMessage(content="")
+        system.content = f"""{system.content}
 
 Return your answer according to the 'properties' of the following schema:
 {model.schema()}
@@ -127,9 +128,11 @@ Return only the JSON object with the properties filled in.
 Do not include anything in your response other than the JSON object.
 Do not begin your response with ```json or end it with ```.
 """
-        messages = [system_prompt] + messages[1:]
-        response = await self.get_chat_response(messages)
-        obj = model.load_raw(response)
+        print("final system")
+        print(system.content)
+        response = await self.get_chat_response(messages, system=system)
+        print(response)
+        obj = model.parse_raw(response.content)
         return obj
 
 

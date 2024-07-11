@@ -1,6 +1,9 @@
 from __future__ import annotations
+
+import json
+
 from smartnotes.ai import llm, message
-from smartnotes.ai.tool import tool
+from smartnotes.ai.tool import tool, send_message, ToolInvocation, ToolResponse, get_temperature
 
 
 class Agent:
@@ -11,25 +14,63 @@ class Agent:
         tools: list[tool.Tool] | None = None,
     ):
         self.system = system or message.SystemMessage(content="")
-        self.scratchpad = {}
+        self.scratchpad: list[ToolResponse] = []
         self.llm = llm
-        self.tools = tools or []
+        self.tools = tools or [send_message, get_temperature]
+        print(self.tools)
 
     def modify_messages(self, messages: list[message.Message]):
         return messages
 
     def get_system_message(self) -> message.SystemMessage:
-        tools_message = """You have the following tools available:
-{"\n".join([t.sc])}
-        """
-        return self.system
+        system = self.system
+        if len(self.tools) > 0:
+            print("tools")
+            print(self.tools)
+            system = f"""{system}
+You have the following tools available:
+{"\n".join([json.dumps([tool.dict(exclude={"_func"}) for tool in self.tools], indent=2)])}
+Make sure your response includes only one of these valid tools.
+"""
+        if len(self.scratchpad) > 0:
+            system = f"""{system}
+The current scratchpad output of tool invocation responses is:
+{"\n".join([json.dumps([response.dict(exclude={"invocation._func"}) for response in self.scratchpad], indent=2)])}
+"""
+        print(system)
+        return message.SystemMessage(content=system)
 
     async def stream(self, messages: list[message.Message]):
         system = self.get_system_message()
         messages = self.modify_messages(messages)
-        async for ai_message in self.llm.stream_chat_response(messages, system=system):
-            messages[-1] = ai_message
+
+        while True:
+            print("messages")
+            print(messages)
+            response = await self.llm.get_structured_response(messages, model=ToolInvocation, system=system)
+            assert isinstance(response, ToolInvocation), f"Expected a ToolInvocation response, got {response}"
+            ai_message = message.AIMessage(content=json.dumps(response.dict(), indent=2))
+            messages.append(ai_message)
+            print(ai_message)
             yield ai_message
+
+            tool_name = eval(response.tool)
+            # Base case
+            if response.tool == "send_message":
+                return
+            # Invoke the tool.
+            result = tool_name._func(**response.params)
+
+            # Otherwise add the response to the scratchpad.
+            result = tool_name._func(**response.params)
+            tool_response = ToolResponse(invocation=response, result=result, error=None)
+            self.scratchpad.append(tool_response)
+            user_message = message.UserMessage(content=f"Tool invocation response: {result}")
+            messages.append(user_message)
+            yield user_message
+        # async for ai_message in self.llm.stream_chat_response(messages, system=system):
+        #     messages[-1] = ai_message
+        #     yield ai_message
 
     async def get_response(self, messages: list[message.Message]):
         system = self.get_system_message()
@@ -51,5 +92,8 @@ class ContextAgent(Agent):
 
     def get_system_message(self) -> message.SystemMessage:
         system = super().get_system_message()
+        print("original system")
+        print(system)
         if len(self.context_files) > 0:
-            system.content = f"Use the following files as context: {self.context_files}"
+            system.content = f"{system}\nUse the following files as context: {self.context_files}"
+        return system
