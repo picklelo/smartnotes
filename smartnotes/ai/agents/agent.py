@@ -5,6 +5,7 @@ import json
 from smartnotes.ai import llm, message
 from smartnotes.ai import tool as tool_list
 from smartnotes.ai.tool import tool, ToolInvocation, ToolResponse
+from smartnotes.ai import memories
 
 import linear
 import git
@@ -23,13 +24,22 @@ class Agent:
         self.tools = tools or [tool_list.send_message, tool_list.get_temperature, tool_list.run_python_code,
             linear.get_projects,
             linear.get_issues,
+            linear.get_project_info,
             tool_list.read_journal_entry,
             git.get_github_issues,
+            memories.read_memory,
+            memories.list_memories,
+            memories.write_memory
         ]
         print(self.tools)
 
     def modify_messages(self, messages: list[message.Message]):
-        return messages
+        # Go back 10 user messages.
+        user_messages = [message for message in messages if message.role == "user"]
+        print(user_messages)
+        start_message = max(len(user_messages) - 10, 0)
+        start_index = messages.index(user_messages[start_message])
+        return messages[start_index:]
 
     def get_system_message(self) -> message.SystemMessage:
         system = self.system
@@ -89,7 +99,7 @@ class ConversationNameAgent(Agent):
     def modify_messages(self, messages: list[message.Message]):
         assert len(messages) > 0, "No messages provided."
         first_message = messages[0].content
-        prompt = f"""Given the following first message to this conversation, give it a short, succinct title: {first_message}.\n Include only the title, nothing else."""
+        prompt = f"""Given the following first message to this conversation, give it a short, succinct title: {first_message}.\n Include only the title, nothing else. Do not include any text other than the new title."""
         return [message.UserMessage(content=prompt)]
 
 class ContextAgent(Agent):

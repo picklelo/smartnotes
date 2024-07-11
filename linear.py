@@ -121,8 +121,47 @@ def get_active_projects():
 
 
 @tool
+def get_project_info(project_name: str):
+    """Get the info about a project and all its issues.
+    
+    Args:
+        project_name: The name of the project to get info for.
+    """
+    projects = []
+    query = f"""query GetProjects($cursor: String) {{
+        projects(
+            after: $cursor, 
+            first: 50,
+            filter: {{
+                name: {{
+                    eq: "{project_name}"
+                }}
+            }}
+        ) {{ 
+            nodes {{ 
+                name
+                status {{
+                    name
+                }}
+                content
+            }}
+            pageInfo {{
+                endCursor
+                hasNextPage
+            }}
+        }}
+    }}"""
+    for resp in paginated_query(query, "projects"):
+        projects.extend([Project.parse_obj(project) for project in resp])
+    if len(projects) == 0:
+        return None
+    project = projects[0]
+    project.issues = get_issues._func(project.name)
+    return project
+
+@tool
 def get_projects(initiative: str | None = None):
-    """Get all the projects with the given filters.
+    """Get all the projects within the given initiative.
     
     Args:
         initiative: The initiative to filter by.

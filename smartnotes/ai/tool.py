@@ -78,7 +78,7 @@ def run_python_code(code: str) -> str:
     """Run Python code and return the result. Make sure to include the entirety of what's needed, including imports, etc."""
     print(f"Running Python code: {code}")
     with io.StringIO() as buf, contextlib.redirect_stdout(buf):
-        exec(code, {"__builtins__": __builtins__}, {})
+        exec(code, locals(), locals())
         output = buf.getvalue()
     return output
 
