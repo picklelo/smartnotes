@@ -51,7 +51,7 @@ class AnthropicClient(Client):
 
         self.client = AsyncAnthropic()
         self.model = model
-        self.maax_tokens = 4096
+        self.max_tokens = 4096
 
     async def get_chat_response(
         self,
@@ -97,7 +97,7 @@ class AnthropicClient(Client):
         system = system or message.SystemMessage(content="")
         ai_message = message.AIMessage(content="")
         async with self.client.messages.stream(
-            max_tokens=4096,
+            max_tokens=self.max_tokens,
             messages=to_llm_message(messages),
             model=self.model,
             system=system.content,

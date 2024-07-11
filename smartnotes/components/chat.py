@@ -26,8 +26,8 @@ class ChatState(rx.State):
     async def name_conversation(self):
         if self.current_conversation.name != DEFAULT_CONVERSATIION_NAME:
             return
-        convo_agent = agent.ConversationNameAgent(messages=self.messages)
-        response = await convo_agent.get_response()
+        convo_agent = agent.ConversationNameAgent()
+        response = await convo_agent.get_response(self.messages[:1])
         with rx.session() as session:
             self.current_conversation.name = response.content
             session.add(self.current_conversation)
@@ -92,7 +92,8 @@ class ChatState(rx.State):
 
         context_state = await self.get_state(ContextState)
         context_agent = agent.ContextAgent(context_files=context_state._get_context())
-        async for message in context_agent.stream(self.messages):
+        print("values")
+        async for message in context_agent.stream(self.messages.copy()):
             self.messages[-1].content = message.content
             yield
         with rx.session() as session:

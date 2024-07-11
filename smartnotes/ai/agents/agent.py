@@ -31,9 +31,9 @@ class Agent:
             messages[-1] = ai_message
             yield ai_message
 
-    async def get_response(self):
+    async def get_response(self, messages: list[message.Message]):
         system = self.get_system_message()
-        messages = self.get_messages()
+        messages = self.modify_messages(messages)
         return await self.llm.get_chat_response(messages, system=system)
 
 
