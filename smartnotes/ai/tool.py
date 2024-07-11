@@ -70,6 +70,17 @@ def get_temperature(city: str) -> int:
     print(f"Getting temperature for {city}")
     return 75
 
+import io
+import contextlib
+
+@tool
+def run_python_code(code: str) -> str:
+    """Run Python code and return the result. Make sure to include the entirety of what's needed, including imports, etc."""
+    print(f"Running Python code: {code}")
+    with io.StringIO() as buf, contextlib.redirect_stdout(buf):
+        exec(code, {"__builtins__": __builtins__}, {})
+        output = buf.getvalue()
+    return output
 
 @tool
 def get_issues():
@@ -84,3 +95,27 @@ def get_issues():
                 f.write(
                     f"{issue.number}, {issue.state}, {issue.title}, {issue.state}\n"
                 )
+
+
+@tool
+def read_journal_entry(date: str) -> str:
+    """Reads a journal entry for a given date.
+
+    Args:
+        date (str): The date in the format 'YYYY-MM-DD'.
+
+    Returns:
+        str: The content of the journal entry or an error message if the file does not exist.
+    """
+    print(date)
+    year, month_day = date.split("-")[:2]
+    file_path = (
+        f"/Users/nikhil/Documents/Vault/journal/{year}/{year}-{month_day}/{date}.md"
+    )
+
+    try:
+        print("open", file_path)
+        with open(file_path, "r") as file:
+            return file.read()
+    except FileNotFoundError:
+        return "Journal entry not found for the specified date."

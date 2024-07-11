@@ -1,3 +1,4 @@
+3658, open, DebounceInput not allowed in rx.form.control(), open
 3657, open, benchmarks.yml: use node 18.x with reflex-web@main, open
 3655, open, debounce: pass through key and special_props, open
 3653, open, `rx.input(value=State.nested.var)` is not updated when `nested` is set to a new object containing the same content., open
@@ -19,270 +20,22 @@
 3620, open, Help wrapping react component : primereact/treetable, open
 3619, open, radial bar customization, open
 3617, open, [REF-3225] implement __format__ for immutable vars, open
-3616, open, Set Up GitHub Actions for Easy Deployment to Reflex Own Deployment Service., open
-3615, open, How to use it in air-gapped environment?, open
-3614, open, Switch db to posthog for benchmarking, open
 3611, open, [WIP] Improve graphing asethetic, open
 3605, open, Gunicorn workers time out on event handler in prod mode, open
 3604, open, [REF-3219] use hooks.useState will raise: ValueError: Can not compile, the tag useState is used multiple time from react and react, open
-3602, open, `get_upload_url` does not work as expected, open
-3595, open, [REF-3239] Var dependency bug, open
 3593, open, Use tailwind typography plugin by default, open
 3586, open, Does reflex support render tree data?, open
 3581, open, [REF-3243] Recharts allow_decimals does not work as described, open
-3571, open, Installing base frontend packages failed with exit code 255, open
 3565, open, [REF-3192] rx.foreach over computed var list fails, open
-3564, open, [REF-3190] Add testing to verify props propagation of all reflex components, open
-3559, open, @lottiefiles/dotlottie-react: React component for rendering and controlling dotLottie animations in React applications., open
 3554, open, [REF-3184] All my rx.background don't work on 0.5.5, open
-3549, open, `rx.select(position="item-aligned")` propagates click events on mobile, open
-3544, open, [suggestion] Python Code Security Plugin, Pixeebot (Free Installation for Open Source), open
 3541, open, [REF-3167] `rx.select` does not propagate props, open
-3517, open, File upload appears to hold everything in memory until the end, open
 3514, open, Replace rich progress bar to tqdm progress bar, open
-3506, open, [REF-3134] K8 Liveness and Readiness probes, open
-3505, open, Redis does not reconnect as expected., open
-3504, open, Import errors inside reflex under the hood, open
-3493, open, How to add a custom tooltip to Recharts components?, open
 3491, open, notifying frontend about backend error looks better, open
-3489, open, [REF-3107] Dynamic domain in sitemap, open
-3488, open, rx.moment() with from_now and local options set doesn't respect local TZ, open
-3487, open, Removing Rich, open
-3461, open, Buttons stop working after a sequence, open
 3438, open, [REF-3014] Bug in serializing lists/dict of `rx.Base`, open
-3437, open, Cannot render states with typing.ForwardRef, open
-3431, open, [REF-3011] Hash in URL does not jump to anchor defined in markdown, open
-3418, open, Can Reflex deal with some state/components running in subprocesses?, open
-3407, open, I can't change width on popover, open
-3405, open, [WIP]Imports Benchmark Times Not representative(Testing), open
-3391, open, The by_alias=True parameter for the dict() and model_dump() functions is not selecting the alias in a class derived from rx.Model correctly., open
-3376, open, rx.select lose their scroll on scroll down or scroll up, open
-3374, open, Normal `State` variable use causes `call-arg` and `arg-type` errors in `mypy`, open
-3373, open, [REF-2917] `rx.select` jumps page content to an anchor after selecting., open
-3363, open, [REF-2889] reflex-web benchmarking is failing, open
-3362, open, Can't run the basic reflex app on the 'arm64' packages of my M1 chip mac, open
-3360, open, [REF-2887] [Unconfirmed] Updating a field in an object in a collection of rx.Base models does not send delta, open
-3352, open, Need a basic template., open
-3344, open, Add rx.SessionStorage() for token storage, open
-3341, open, custom_components._get_package_config called numerous times, open
 3340, open, pickle frontend payloads, open
-3329, open, on_unmount doesn't work, open
-3326, open, AssertionError: Title must be a single string, open
-3324, open, Update docker-example, open
-3320, open, Update Turkish README.md, open
-3319, open, Update Portuguese Brazilian README.md, open
-3317, open, Update Japanese README.md, open
-3316, open, Update Italian README.md, open
-3311, open, A reflex command called `reflex run --skip-install` to skip continuous install of npm packages., open
-3308, open, rx.set_clipboard broken in 0.5.0, open
-3300, open, [WiP] Proxy backend requests on '/' to the frontend, open
-3299, open, Custom Responsive Breakpoints, open
-3296, open, [REF-2831] Reflex backend should proxy to the frontend server or serve static files directly, open
-3289, open, Reflex hosting service tries to authorize using oauth owned by a user instead of app, open
 3282, open, on_mount calls a fn twice and on_load calls a fn tree times on debug mode., open
-3279, open, about use rx.memo with children, open
-3278, open, rx.tooltip doesn't work with rx.button when that rx.button has additional properties, open
-3277, open, Cannot deploy app with "paramiko" as dependency, open
-3268, open, Issue with reflex.dev documentation, open
-3239, open, Issue with Custom Components, open
-3238, open, Can't create instance of `ComponentState` inside `foreach`, open
-3230, open, [REF-2761] Create `backend.Dockerfile` example, open
-3229, open, [REF-2760] print statements inside backend event handler do not appear in azure docker logs, open
-3218, open, Fix es6 escaping, open
 3214, open, add module prefix to generated state names, open
-3213, open, `rx.match` doesn't work within f-string, open
-3210, open, [REF-2745] rx.form handle_submit lambda cannot reference foreach vars, open
-3207, open, Compile time check to see if Wrapping React Package is Valid, open
-3201, open, Toggle color mode, specify light/dark, open
-3198, open, [REF-2370] Combine library/version into ImportVar and replace _get_imports with _get_imports_list, open
-3189, open, [REF-2716] Cannot pass an icon component to high level rx.callout icon prop, open
-3182, open, Charka Stepper in Codebase but not documented, open
-3166, open, Server issue on Sidekick Browser, open
-3137, open, [REF-2625] Use rx.markdown to render mermaid diagrams, open
-3129, open, Issue with reflex.dev documentation - The code in the example on the page and the code in the generated app are different, open
-3109, open, Bitdefender reports malicious command line detected during Bun install, open
-3107, open, [REF-2604] Default titles for dynamic routes include the [...] placeholder, open
-3101, open, Lru caching, open
-3098, open, Inline style inheritance, open
-3086, open, When rx.cond and rx.accordian are used together, the open accordian is closed when the `value` prop in accordion Item is not set after applying deltas., open
 3083, open, [REF-2925] How to set the display range of the y-axis data., open
-3069, open, [REF-2567] rx.accordion hardcodes a tiny font size, open
-3068, open, [REF-2566] rx.accordion is ugly as sin when `tailwind=None`, open
-3064, open, [REF-2561] Shouldn't rx.Config.app_name be the module/app path?, open
-3041, open, fix download for uploaded files, open
-3040, open, Ctrl-C on windows does not disappear Theme Panel, open
-3039, open, [WIP]Form High Level API, open
-3038, open, rx.debounce_input() does not work with rx.slider(), open
-3034, open, Minify js code in rx.script tags, open
-3032, open, Replace Webpack with Esbuild (An extremely fast bundler for React)., open
-3021, open, [REF-2503] Memory StateManager should have some sort of expiration, open
-3015, open, Color_mode_cond strips string in code_block, open
-3009, open, Issue with reflex.dev documentation, open
-3004, open, Issue with Animation in Radix Accordion, open
-2998, open, use Any for serializer fn value annotation, open
-2987, open, rx.popover doesn't work when rx.button has dynamic title, open
-2983, open, Example of wrapping ReactFlow doesn't work as intended(nodes can't be dragged), open
-2979, open, rx.cond in style, open
-2972, open, [REF-2444] IndexError: list index out of range when publishing custom component, open
-2970, open, reflex init with poetry, open
-2958, open, rx.cond in _hover, open
-2950, open, [REF-2287] Redis fetches the same state multiple times, open
-2917, open, Sluggish performance when style prop changes frequently, open
-2902, open, [REF-2535] Export don't generate the asset folder, open
-2901, open, Replace Redis with an open-source alternative due to licensing changes, open
-2887, open, Move state benchmark to benchmark dir, open
-2862, open, Read and Write Cookie with httpOnly=true., open
-2847, open, rx.color_mode_cond() does not work with rx.theme_panel(), open
-2832, open, Move stateful_components to .web/components, open
-2831, open, Fix dynamic import when compiling in --env prod, open
-2830, open, Fixed the reinstallation of bun, open
-2823, open, Websocket Error when local hosting in GitHub Codespaces, open
-2822, open, state: update inherited_vars and tracking dicts when adding vars, open
-2821, open, Dropdown menu doesn't work with fallback avatar, open
-2819, open, POC for exposing get_state and modify_state at rx. level, open
-2806, open, CTRL+V files from clipboard into rx.upload, open
-2805, open, Scroll to section after click a link inside a drawer don't work, open
-2802, open, [Under Consideration] Deprecate and then remove starlette_admin, open
-2794, open, [BUG] Text Input Field Messes with the Typed Text, open
-2790, open, Drawer content has a blue ring by default, open
-2773, open, Issue with reflex.dev documentation, open
-2771, open, Feature Request: Shared/Scoped State, open
-2764, open, How to refresh rx.data_editor, open
-2761, open, [REF-2111] ~x versus x==False gives different result, open
-2753, open, Trying to reinstall bun when it is installed, open
-2751, open, [wip] Pydantic v2, open
-2746, open, add initial_value for base vars, open
-2740, open, `domain` prop missing from PolarRadiusAxis, open
-2727, open, Reflex Roadmap, open
-2722, open, Move docs from reflex-web to main repo, open
-2719, open, rx.heading responsive, open
-2718, open, [REF-2084] `rx.theme_panel()` shortcut on windows overlap with Windows 11 Copilot , open
-2717, open, [WIP] Drop cloudpickle v2, open
-2704, open, Add the ability to get request headers in the frontend, open
-2694, open, [REF-2052]  Incorrect Usage of rx.switch in your Documentation, open
-2686, open, Shadowing computed vars, open
 2671, open, Connection state, open
-2667, open, [REF-1999] on_mount does not work properly with custom EventChain Vars, open
-2659, open, [REF-2056] list of rx.Base isn't considered iterable, open
-2649, open, ThemPanel button 'CopyTheme' gives runtime error, open
-2646, open, Reflex 0.4.0 breaks the page after recompile, open
-2633, open, Recursive accordion fails, open
-2606, open, Resize Watcher getting error when I try to use @login_required method on local_auth example, open
-2578, open, unable to set `background-color `as `none`, open
-2576, open, Missing `onGridSelectionChange` event trigger in `DataEditor`, open
-2569, open, Feature Request: Sortable `data_editor`, open
-2565, open, problem with on_load when i set cookie token and  redirects, open
-2561, open, [REF-1940] reflex run Installing base frontend packages  Resolving dependencies, open
-2559, open, [REF-1943] Backend variables should not be accessible to render, open
-2556, open, [Experimental] Test with turbopack, open
-2496, open, Unable to containerize reflex app, open
-2475, open, [FEAT] react native, open
-2471, open, reflex\testing.py is using platform.system, causing pre-commit error for Windows, open
-2449, open, relfex init fail, open
-2437, open, When I use on_change and on_blut the data table tends to blink!, open
-2433, open, Reflex runs very slow, does not refresh automatically and gives errors, open
 2429, open, Track state variable and attribute usage, open
-2426, open, [REF-2738] Data table does not overflow, open
-2416, open, Many callbacks on input element, open
-2412, open, High level api for tabs component, open
-2396, open, Cannot find module 'next/dist/compiled/arg/index.js', open
-2384, open, Backend only mode emits warning about missing node binary, open
-2367, open, how to speed up the edit to result speed (vs change to browser change), open
-2366, open, How to add tailwind style to a button?, open
-2363, open, rx.video does not support responsiveness in its width and height properties, open
-2354, open, Backend: set the number of gunicorn processes in rxconfig.py, open
-2339, open, Internationalization (I18N) and localization (L10N) (Feature Request) , open
-2317, open, [REF-1558] Tailwind css unable to add a plugin with additional settings, open
-2313, open, @chakra-ui ENOENT: no such file or directory, read. FAILING TO COMPILE, open
-2305, open, [REF-1896] I found an error that when using the "reflex init" command gives me this error:, open
-2301, open, [REF-1501] Some proposals for call_script(), open
-2297, open, High level api graphing, open
-2295, open, [Feature Request] More data_editor tutorials, open
-2294, open, reflex run --frontend-only should support hot reload, open
-2287, open, Support global tracking of keys, open
-2282, open, Running Reflex via systemd with --env prod param only runs the frontend and not the backend., open
-2265, open, DataEditor edit window location issue, open
-2251, open, How to add firebase auth to reflex app, open
-2232, open, DataEditor custom cell formatters and cell editors, open
-2221, open, reflex run doesn't work in Windows PC, open
-2197, open, Typing rapidly in documentation example results in corrupted data, open
-2196, open, reflex deploy already logged in can yield error, open
-2188, open, Improve error message for cold, open
-2174, open, multi-language ？, open
-2157, open, rx.number_input can't be blank if linked to variable, open
-2156, open, Using is_valid_character prop of rx.number_input throws an error, open
-2155, open, [REF-1626] Allow string fomatting in rx.html component, open
-2148, open, rx.text component does not support formatting floats, open
-2147, open, rx.input fails if default_value is typed Optional, open
-2140, open, How can I typehint custom vars correctly, open
-2137, open, failing install of frontend base packages(exit code 9), open
-2136, open, [REF-1584] investigate windows reload performance, open
-2134, open, [WIP]Ref 851/add iconheader to column, open
-2123, open, [REF-1104] MutableProxy not transparent, open
-2119, open, [WIP] add search support to data_editor, open
-2115, open, Installing base frontend packages failed with exit code 1, open
-2113, open, css _webkit_xxxxxx property can't change correct., open
-2111, open, [WIP]Refactor Literals, open
-2091, open, add dataframe support in data_editor, open
-2080, open, [REF-2928] Support to change chart color, open
-2000, open, Type Error when using mixed type dictionaries and numeric_inputs., open
-1999, open, rx.set_focus doesnt work with rx.chakra.pin_input, open
-1972, open, Allow definition of custom commands, open
-1960, open, Data table blinking with the background task, open
-1923, open, [REF-759] TypeError: Object of type list is not JSON serializable, open
-1919, open, Spacing prop does not accept list value, open
-1912, open, Show a skeleton for specific components depending on states before hydration sets state correctly, open
-1909, open, Can't access columns or iterrows() of DataFrame vars, open
-1908, open, Add support for State var in rx.menu items= parameter., open
-1901, open, Expose dependency array parameter for `on_mount` to allow the useEffect to re-run when certain state variables change, open
-1856, open, Error with Website, open
-1830, open, Data Table behavior is inconsistent when empty, open
-1812, open, Dev Docker Env, open
-1802, open, [REF-674] Var name in component id weirdness, open
-1796, open, Connection Error Displayed Upon Server Restart, open
-1784, open, Enable Module Federation, open
-1756, open, Bun coredumps with Illegal instruction on older CPUs without AVX2 support, open
-1755, open, Reconsider adding .env file support back into Reflex, open
 1753, open, Consult migrations status in db cli, open
-1749, open, [REF-1944] reflex init not working, open
-1741, open, npm ERR when reflex run, open
-1737, open, How could I locate menu or button on the full screen background video (mp4)?, open
-1710, open, [REF-3188] Support touchstart, touchend, and friends , open
-1689, open, No docs on including rx.upload in rx.form, open
-1680, open, Reflex init command not running without any error or trace back, open
-1657, open, [REF-2926] rx.plotly doesnt change bg color to plot bg color, open
-1655, open, [REF-1308] Markdown not recognising new lines when rendering, open
-1618, open, Our Own Custom Loading Icon, open
-1617, open, List Item Child Error , open
-1581, open, BUG when run `reflex init`, open
-1565, open, Headers aren't forwarded from Ngrok, open
-1561, open, Better support for inline SVGs, open
-1539, open, Upgrade to Pydantic 2.0, open
-1531, open, Error while setting Component style to a Python Dict, open
-1529, open, Consider tailwindcss/typography as default for rx.markdown and rx.html components, open
-1519, open, Unable to render Material UI component, open
-1518, open, global style selectors are converted to camelCase, which hinders interop with existing components that expect underscore or double underscore, open
-1500, open, [Question] Is there a way to get the same result of 'pc init' by a code command (not by subprocessing and not by command line)?, open
-1475, open, data_table: support row button, open
-1461, open, Trigger Events From ⌘ Keys, open
-1429, open, Python event chains corrupts JSON string data, open
-1427, open, Memoized Components Not recompiling, open
-1417, open, Compatibility with VercelDB, open
-1410, open, Feature Request: Integrate reflex w/ Django Ninja Backend, open
-1396, open, Remove misleading alembic configuration, open
-1373, open, [Config Refactor] need a way to set_config in the main process and apply config values to subprocesses, open
-1368, open, Substate should allow same var names as parent state, open
-1314, open, [REF-3186] Support window event handlers on_focus and on_blur, open
-1291, open, Feature Request: Is there a way to add Open Street Map component and plot coordinates or polylines on them?, open
-1187, open, [REF-1307] SeekTo doesn't work with pc.video, open
-1066, open, Chaining upload events with other events produces weird behavior, open
-1023, open, Figma to Pynecone plugin, open
-968, open, Existing table, PK is named differently than id., open
-893, open, Grandchild states do not correctly see dynamic vars added to parent state, open
-847, open, matplotlib and altair, open
-833, open, Datatable doesn't resize based on adjusting the width of screen, open
-781, open, potential feature: reload image when image src contents change, open
-613, open, pc.html does not pay attention to tags, open
-507, open, [Enhancement] Improve Event Triggers with Event Detail Objects, open
-463, open, Split the on_scroll Base Event Trigger, open
-46, open, Embedding Pynecone in other apps, open

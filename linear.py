@@ -3,6 +3,8 @@ import httpx
 import os
 import reflex as rx
 
+from smartnotes.ai.tool import tool
+
 class ProjectStatus(rx.Base):
     name: str
 
@@ -39,136 +41,156 @@ def make_request(data):
     }
 
     response = httpx.post(url, headers=headers, json=data)
+    print(response.content)
     return response.json()
 
-
-def get_issues(project_names):
-    if isinstance(project_names, str):
-        project_names = [project_names]
-    cursor = None  # Initialize cursor
-    issues = []
+def paginated_query(query, name):
+    cursor = None
     while True:
-        # Update the query to include a variable for the cursor
         data = {
-            "query": f"""query GetIssues($cursor: String) {{
-                issues(
-                    first: 50,
-                    after: $cursor,
-                    filter: {{
-                        project: {{
-                            name: {{
-                                in: {json.dumps(project_names)}
-                            }}
-                        }}
-                        state: {{
-                            name: {{
-                                nin: ["Canceled"]
-                            }}
-                        }}
-                    }}
-                ) {{ 
-                    nodes {{ 
-                        identifier
-                        title
-                        description
-                        state {{
-                            name
-                        }}
-                        createdAt
-                        assignee {{
-                            name
-                        }}
-                        project {{
-                            name
-                        }}
-                    }}
-                    pageInfo {{
-                        endCursor
-                        hasNextPage
-                    }}
-                }}
-            }}""",
-            "variables": {"cursor": cursor},  # Pass cursor as a variable
+            "query": query,
+            "variables": {"cursor": cursor},
         }
+        print("data")
         print(data)
         resp = make_request(data)
         print(resp)
-        issues.extend([Issue.parse_obj(issue) for issue in resp["data"]["issues"]["nodes"]])
-        has_next_page = resp["data"]["issues"]["pageInfo"]["hasNextPage"]
-        cursor = resp["data"]["issues"]["pageInfo"]["endCursor"]  # Update cursor for the next iteration
+        yield resp["data"][name]["nodes"]
+        has_next_page = resp["data"][name]["pageInfo"]["hasNextPage"]
+        cursor = resp["data"][name]["pageInfo"]["endCursor"]
         if not has_next_page:
             break
-    return issues
 
-def get_all_projects():
-    projects = []
-    cursor = None  # Initialize cursor
-    while True:
-        # Update the query to include a variable for the cursor
-        data = {
-            "query": f"""query GetProjects($cursor: String) {{
-                projects(
-                    after: $cursor, 
-                    first: 50,
-                    filter: {{
-                        status: {{
-                            name: {{
-                                nin: ["Canceled", "Completed", "Backlog"]
-                            }}
-                        }}
-                        initiatives: {{
-                            name: {{
-                                eq: "Flexgen"
-                            }}
-                        }} 
-                    }}
-                ) {{ 
-                    nodes {{ 
-                        name
-                        status {{
-                            name
-                        }}
-                        content
-                    }}
-                    pageInfo {{
-                        endCursor
-                        hasNextPage
+@tool
+def get_issues(project_names: list[str]):
+    """Get all the issues for the given projects.
+    
+    Args:
+        project_names: The names of the projects to get issues for.
+    """
+    if isinstance(project_names, str):
+        project_names = [project_names]
+    issues = []
+    # Update the query to include a variable for the cursor
+    query = f"""query GetIssues($cursor: String) {{
+        issues(
+            first: 50,
+            after: $cursor,
+            filter: {{
+                project: {{
+                    name: {{
+                        in: {json.dumps(project_names)}
                     }}
                 }}
-            }}""",
-            "variables": {"cursor": cursor},  # Pass cursor as a variable
-        }
-        resp = make_request(data)
+                state: {{
+                    name: {{
+                        nin: ["Canceled"]
+                    }}
+                }}
+            }}
+        ) {{ 
+            nodes {{ 
+                identifier
+                title
+                description
+                state {{
+                    name
+                }}
+                createdAt
+                assignee {{
+                    name
+                }}
+                project {{
+                    name
+                }}
+            }}
+            pageInfo {{
+                endCursor
+                hasNextPage
+            }}
+        }}
+    }}"""
+    for resp in paginated_query(query, "issues"):
         print(resp)
-        projects.extend([Project.parse_obj(project) for project in resp["data"]["projects"]["nodes"]])
-        has_next_page = resp["data"]["projects"]["pageInfo"]["hasNextPage"]
-        cursor = resp["data"]["projects"]["pageInfo"]["endCursor"]  # Update cursor for the next iteration
-        if not has_next_page:
-            break
+        issues.extend([Issue.parse_obj(issue) for issue in resp])
+    return issues
+
+@tool
+def get_active_projects():
+    """Get all the active projects the team is currently working on."""
+
+
+@tool
+def get_projects(initiative: str | None = None):
+    """Get all the projects with the given filters.
+    
+    Args:
+        initiative: The initiative to filter by.
+    """
+    projects = []
+    query = f"""query GetProjects($cursor: String) {{
+        projects(
+            after: $cursor, 
+            first: 50,
+            filter: {{
+                status: {{
+                    name: {{
+                        nin: ["Canceled", "Completed", "Backlog"]
+                    }}
+                }}
+                initiatives: {{
+                    name: {{
+                        eq: "{initiative}"
+                    }}
+                }} 
+            }}
+        ) {{ 
+            nodes {{ 
+                name
+                status {{
+                    name
+                }}
+                content
+            }}
+            pageInfo {{
+                endCursor
+                hasNextPage
+            }}
+        }}
+    }}"""
+    for resp in paginated_query(query, "projects"):
+        projects.extend([Project.parse_obj(project) for project in resp])
+
     # Get issues for each project
     open_projects = [p for p in projects if p.status.name not in ["Canceled", "Completed", "Backlog", "Paused"]]
-    open_projects.sort(key=lambda x: x.status.name)
-    issues = get_issues([project.name for project in open_projects])
-    for project in open_projects:
-        if project.name in ["Open Source Bugs", "Templates and Recipes", "Core Graphing Improvements", "Reflex Web Performance"]:
-            continue
-        if project.status.name not in ["Paused"]:
-            project.issues = [issue for issue in issues if issue.project.name == project.name]
-        else:
-            print("Skipping issues for paused project", project.name)
-    return projects, open_projects
+    # open_projects.sort(key=lambda x: x.status.name)
+    # issues = get_issues._func([project.name for project in open_projects])
+    # for project in open_projects:
+    #     if project.name in ["Open Source Bugs", "Templates and Recipes", "Core Graphing Improvements", "Reflex Web Performance"]:
+    #         continue
+    #     if project.status.name not in ["Paused"]:
+    #         project.issues = [issue for issue in issues if issue.project.name == project.name]
+    #     else:
+    #         print("Skipping issues for paused project", project.name)
+    # return projects, open_projects
+    return projects
 
 import json
-# issues = get_issues("Flexgen V0")
+# print("getting issues")
+# issues = get_issues._func("Flexgen V0")
 # with open("context/linear-issues.json", "w") as f:
 #     f.write(json.dumps([issue.dict() for issue in issues], indent=2))
-# # print(json.dumps([issue.dict() for issue in issues], indent=2))
+# print(json.dumps([issue.dict() for issue in issues], indent=2))
 
-projects, open_projects = get_all_projects()
-print(projects)
-print(len(projects), len(open_projects))
-# Sort by status
-print(open_projects, len(open_projects))
-with open("context/linear-projects.json", "w") as f:
-    f.write(json.dumps([project.dict() for project in open_projects], indent=2))
+# projects, open_projects = get_all_projects._func("Flexgen")
+# projects = get_projects._func("Flexgen")
+# open_projects = projects
+# print(projects)
+# print(len(projects), len(open_projects))
+# # Sort by status
+# print(open_projects, len(open_projects))
+# with open("context/linear-projects.json", "w") as f:
+#     f.write(json.dumps([project.dict() for project in open_projects], indent=2))
 # print("\n".join([p.name for p in projects]))
+
+# print(get_initiatives._func())

@@ -107,7 +107,7 @@ class AnthropicClient(Client):
                 yield ai_message
 
     async def get_structured_response(
-        self, messages: dict, model: Type[rx.Base], system: message.SystemMessage | None = None
+        self, messages: list[message.Message], model: Type[rx.Base], system: message.SystemMessage | None = None
     ) -> Type[rx.Base]:
         """Get the structured response from the chat model.
 
@@ -132,7 +132,15 @@ Do not begin your response with ```json or end it with ```.
         print(system.content)
         response = await self.get_chat_response(messages, system=system)
         print(response)
-        obj = model.parse_raw(response.content)
+        try:
+            obj = model.parse_raw(response.content)
+        except Exception as e:
+            # Try again, printing the exception.
+            messages = messages + [
+                response,
+                message.UserMessage(content=f"There was an error while parsing. Make sure to only include the JSON. Error: {e}")
+            ]
+            return await self.get_structured_response(messages, model=model, system=system)
         return obj
 
 

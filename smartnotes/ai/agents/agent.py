@@ -3,7 +3,11 @@ from __future__ import annotations
 import json
 
 from smartnotes.ai import llm, message
-from smartnotes.ai.tool import tool, send_message, ToolInvocation, ToolResponse, get_temperature
+from smartnotes.ai import tool as tool_list
+from smartnotes.ai.tool import tool, ToolInvocation, ToolResponse
+
+import linear
+import git
 
 
 class Agent:
@@ -16,7 +20,12 @@ class Agent:
         self.system = system or message.SystemMessage(content="")
         self.scratchpad: list[ToolResponse] = []
         self.llm = llm
-        self.tools = tools or [send_message, get_temperature]
+        self.tools = tools or [tool_list.send_message, tool_list.get_temperature, tool_list.run_python_code,
+            linear.get_projects,
+            linear.get_issues,
+            tool_list.read_journal_entry,
+            git.get_github_issues,
+        ]
         print(self.tools)
 
     def modify_messages(self, messages: list[message.Message]):
@@ -49,20 +58,18 @@ The current scratchpad output of tool invocation responses is:
             print(messages)
             response = await self.llm.get_structured_response(messages, model=ToolInvocation, system=system)
             assert isinstance(response, ToolInvocation), f"Expected a ToolInvocation response, got {response}"
+            # Base case
+            if response.tool == "send_message":
+                yield message.AIMessage(content=response.params["message"])
+                return
             ai_message = message.AIMessage(content=json.dumps(response.dict(), indent=2))
             messages.append(ai_message)
             print(ai_message)
+
             yield ai_message
-
-            tool_name = eval(response.tool)
-            # Base case
-            if response.tool == "send_message":
-                return
+            tool = [tool for tool in self.tools if tool.name == response.tool][0]
             # Invoke the tool.
-            result = tool_name._func(**response.params)
-
-            # Otherwise add the response to the scratchpad.
-            result = tool_name._func(**response.params)
+            result = tool._func(**response.params)
             tool_response = ToolResponse(invocation=response, result=result, error=None)
             self.scratchpad.append(tool_response)
             user_message = message.UserMessage(content=f"Tool invocation response: {result}")
