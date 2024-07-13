@@ -3,13 +3,14 @@ import requests
 from newspaper import Article
 
 
-def read_webpage(url: str, limit: int = 10000):
+def read_webpage(url: str, offset: int = 0, limit: int = 10000):
     """Read the text from a webpage (with an optional character limit)."""
     try:
         article = Article(url)
         article.download()
         article.parse()
-        return article.text[:limit] + ("..." if len(article.text) > limit else "")
+        article_text = article.text[offset : offset + limit]
+        return article_text + ("..." if len(article_text) > limit else "")
     except:
         return "Unable to read the webpage."
 

@@ -101,14 +101,14 @@ class ChatState(rx.State):
         #         linear.get_component_docs,
         #     ]
         # )
-        message_index = len(self.messages)
+        message_index = len(self.messages) - 1
         async for message in context_agent.stream(self.messages.copy()):
             message.conversation_id = self.current_conversation.id
             self.messages.append(message)
             yield
         with rx.session() as session:
-            print("adding messages", self.messages[-2], self.messages[-1])
             for message in self.messages[message_index:]:
+                print("adding message", message)
                 session.add(message)
             # session.add(self.messages[-2])
             # session.add(self.messages[-1])

@@ -56,11 +56,6 @@ def send_message(message: str) -> None:
     """Send a final message to the user. This should be done after all internal processing is completed."""
     print(f"Sending message: {message}")
 
-def get_temperature(city: str) -> int:
-    """Get the temperature of a city."""
-    print(f"Getting temperature for {city}")
-    return 75
-
 import io
 import contextlib
 

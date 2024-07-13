@@ -67,7 +67,7 @@ class AnthropicClient(Client):
             The response from the model.
         """
         system = system or message.SystemMessage(content="")
-        content = (
+        response = (
             (
                 await self.client.messages.create(
                     max_tokens=self.max_tokens,
@@ -76,10 +76,11 @@ class AnthropicClient(Client):
                     system=system.content,
                 )
             )
-            .content[0]
-            .text
         )
+        print(response)
+        content = response.content[0].text
         return message.AIMessage(content=content)
+
 
     async def stream_chat_response(
         self,
@@ -118,8 +119,7 @@ class AnthropicClient(Client):
         Returns:
             The structured response from the model.
         """
-        system = system or message.SystemMessage(content="")
-        system.content = f"""{system.content}
+        system = message.SystemMessage(content=f"""{system or ""}
 
 Return your answer according to the 'properties' of the following schema:
 {model.schema()}
@@ -128,6 +128,7 @@ Return only the JSON object with the properties filled in.
 Do not include anything in your response other than the JSON object.
 Do not begin your response with ```json or end it with ```.
 """
+        )
         print("final system")
         print(system.content)
         response = await self.get_chat_response(messages, system=system)

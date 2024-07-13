@@ -5,3 +5,5 @@
 __pycache__/
 context/
 memories/
+credentials.json
+credentials1.json
