@@ -3,35 +3,21 @@ from __future__ import annotations
 import json
 
 from smartnotes.ai import llm, message
-from smartnotes.ai import tool as tool_list
-from smartnotes.ai.tool import tool, ToolInvocation, ToolResponse
-from smartnotes.ai import memories
-
-import linear
-import git
-
+from smartnotes.ai.tool import Tool, ToolInvocation, ToolResponse
+from typing import Callable
 
 class Agent:
     def __init__(
         self,
         llm: llm.Client = llm.llm,
-        system: message.SystemMessage | None = None,
-        tools: list[tool.Tool] | None = None,
+        prompt: str = "",
+        tools: list[Callable] | None = None,
     ):
-        self.system = system or message.SystemMessage(content="")
+        self.system = message.SystemMessage(content=prompt)
         self.scratchpad: list[ToolResponse] = []
         self.llm = llm
-        self.tools = tools or [tool_list.send_message, tool_list.get_temperature, tool_list.run_python_code,
-            linear.get_projects,
-            linear.get_issues,
-            linear.get_project_info,
-            tool_list.read_journal_entry,
-            git.get_github_issues,
-            memories.read_memory,
-            memories.list_memories,
-            memories.write_memory
-        ]
-        print(self.tools)
+        self.tools = tools or []
+        self.tools = [Tool.from_function(tool) for tool in self.tools]
 
     def modify_messages(self, messages: list[message.Message]):
         # Go back 10 user messages.
@@ -79,8 +65,12 @@ The current scratchpad output of tool invocation responses is:
             yield ai_message
             tool = [tool for tool in self.tools if tool.name == response.tool][0]
             # Invoke the tool.
-            result = tool._func(**response.params)
-            tool_response = ToolResponse(invocation=response, result=result, error=None)
+            try:
+                result = tool._func(**response.params)
+                tool_response = ToolResponse(invocation=response, result=result, error=None)
+            except Exception as e:
+                result = str(e)
+                tool_response = ToolResponse(invocation=response, result=None, error=result)
             self.scratchpad.append(tool_response)
             user_message = message.UserMessage(content=f"Tool invocation response: {result}")
             messages.append(user_message)
@@ -92,6 +82,8 @@ The current scratchpad output of tool invocation responses is:
     async def get_response(self, messages: list[message.Message]):
         system = self.get_system_message()
         messages = self.modify_messages(messages)
+        print("messages", messages)
+        print("system", system)
         return await self.llm.get_chat_response(messages, system=system)
 
 

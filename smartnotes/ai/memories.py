@@ -5,7 +5,6 @@ from smartnotes.ai.tool import tool
 
 BASE_MEMORY_DIR = "memories"
 
-@tool
 def write_memory(key: str, value: str) -> str:
     """Write a memory to a file. The key can be nested using '/' as a separator."""
     path = os.path.join(BASE_MEMORY_DIR, key.replace('/', os.path.sep) + '.json')
@@ -14,7 +13,6 @@ def write_memory(key: str, value: str) -> str:
         json.dump({"value": value}, f)
     return f"Memory '{key}' has been written."
 
-@tool
 def read_memory(key: str) -> str:
     """Read a memory from a file. The key can be nested using '/' as a separator."""
     path = os.path.join(BASE_MEMORY_DIR, key.replace('/', os.path.sep) + '.json')
@@ -24,7 +22,6 @@ def read_memory(key: str) -> str:
         data = json.load(f)
     return f"Memory for '{key}': {data['value']}"
 
-@tool
 def list_memories(start: str = "", depth: int = -1) -> List[Dict[str, str]]:
     """
     List memories starting from a given key prefix, up to a specified depth.

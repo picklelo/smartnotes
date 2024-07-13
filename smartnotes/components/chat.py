@@ -1,11 +1,8 @@
 import reflex as rx
-from smartnotes.ai.llm import llm
 from smartnotes.ai.message import (
     Conversation,
     Message,
-    SystemMessage,
     UserMessage,
-    AIMessage,
 )
 from sqlmodel import select
 from smartnotes.components.file_context import ContextState
@@ -90,9 +87,20 @@ class ChatState(rx.State):
         # )
         yield
 
+        from a import agent as context_agent
+
         context_state = await self.get_state(ContextState)
-        context_agent = agent.ContextAgent(context_files=context_state._get_context())
-        print("values")
+        # context_agent = agent.ContextAgent(
+        #     context_files=context_state._get_context(),
+        #     tools=[
+        #         tool.send_message, 
+        #         # tool_list.get_temperature, tool_list.run_python_code,
+        #         linear.get_projects,
+        #         linear.get_issues,
+        #         linear.get_project_info,
+        #         linear.get_component_docs,
+        #     ]
+        # )
         message_index = len(self.messages)
         async for message in context_agent.stream(self.messages.copy()):
             message.conversation_id = self.current_conversation.id
@@ -107,7 +115,7 @@ class ChatState(rx.State):
             session.commit()
             for message in self.messages[message_index:]:
                 session.refresh(message)
-        await self.name_conversation()
+        # await self.name_conversation()
 
 
 def common_button(icon, color, hover_color, **kwargs):

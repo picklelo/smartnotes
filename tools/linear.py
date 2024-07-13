@@ -3,22 +3,25 @@ import httpx
 import os
 import reflex as rx
 
-from smartnotes.ai.tool import tool
-
 class ProjectStatus(rx.Base):
     name: str
+
 
 class State(rx.Base):
     name: str
 
+
 class User(rx.Base):
     name: str
+
 
 class Project(rx.Base):
     # id: str | None
     name: str
     status: ProjectStatus | None
     content: str | None
+
+
 class Issue(rx.Base):
     identifier: str
     assignee: User | None
@@ -28,6 +31,12 @@ class Issue(rx.Base):
     createdAt: str | None
     project: Project | None
 
+
+class Milestone(rx.Base):
+    name: str
+    description: str | None
+    targetDate: str | None
+    issues: list[Issue] | None
 
 
 # Assuming LINEAR_API_KEY is set in your environment variables
@@ -43,6 +52,7 @@ def make_request(data):
     response = httpx.post(url, headers=headers, json=data)
     print(response.content)
     return response.json()
+
 
 def paginated_query(query, name):
     cursor = None
@@ -61,10 +71,60 @@ def paginated_query(query, name):
         if not has_next_page:
             break
 
-@tool
+
+def get_milestones(project_name: str):
+    """Get all the milestones for the given project.
+
+    Args:
+        project_name: The name of the project to get milestones for.
+    """
+    milestones = []
+    query = f"""query GetMilestones($cursor: String) {{
+        projectMilestones(
+            after: $cursor, 
+            first: 50,
+            filter: {{
+                project: {{
+                    name: {{
+                        eq: "{project_name}"
+                    }}
+                }}
+            }}
+        ) {{ 
+            nodes {{ 
+                name
+                description
+                targetDate
+            }}
+            pageInfo {{
+                endCursor
+                hasNextPage
+            }}
+        }}
+    }}"""
+    for resp in paginated_query(query, "milestones"):
+        milestones.extend([Milestone.parse_obj(milestone) for milestone in resp])
+    return milestones
+
+
+def get_component_docs(component_name: str):
+    """Get the documentation for the given component.
+
+    Args:
+        component_name: The name of the component to get documentation for.
+    """
+    # Get the response from github i.e. : https://raw.githubusercontent.com/reflex-dev/reflex-web/main/docs/library/forms/button.md
+    import httpx
+
+    response = httpx.get(
+        f"https://raw.githubusercontent.com/reflex-dev/reflex-web/main/docs/library/forms/{component_name}.md"
+    )
+    return response.text
+
+
 def get_issues(project_names: list[str]):
     """Get all the issues for the given projects.
-    
+
     Args:
         project_names: The names of the projects to get issues for.
     """
@@ -115,15 +175,14 @@ def get_issues(project_names: list[str]):
         issues.extend([Issue.parse_obj(issue) for issue in resp])
     return issues
 
-@tool
+
 def get_active_projects():
     """Get all the active projects the team is currently working on."""
 
 
-@tool
 def get_project_info(project_name: str):
     """Get the info about a project and all its issues.
-    
+
     Args:
         project_name: The name of the project to get info for.
     """
@@ -159,10 +218,10 @@ def get_project_info(project_name: str):
     project.issues = get_issues._func(project.name)
     return project
 
-@tool
+
 def get_projects(initiative: str | None = None):
     """Get all the projects within the given initiative.
-    
+
     Args:
         initiative: The initiative to filter by.
     """
@@ -201,7 +260,11 @@ def get_projects(initiative: str | None = None):
         projects.extend([Project.parse_obj(project) for project in resp])
 
     # Get issues for each project
-    open_projects = [p for p in projects if p.status.name not in ["Canceled", "Completed", "Backlog", "Paused"]]
+    open_projects = [
+        p
+        for p in projects
+        if p.status.name not in ["Canceled", "Completed", "Backlog", "Paused"]
+    ]
     # open_projects.sort(key=lambda x: x.status.name)
     # issues = get_issues._func([project.name for project in open_projects])
     # for project in open_projects:
@@ -214,7 +277,9 @@ def get_projects(initiative: str | None = None):
     # return projects, open_projects
     return projects
 
+
 import json
+
 # print("getting issues")
 # issues = get_issues._func("Flexgen V0")
 # with open("context/linear-issues.json", "w") as f:
@@ -233,3 +298,4 @@ import json
 # print("\n".join([p.name for p in projects]))
 
 # print(get_initiatives._func())
+# print(get_milestones._func("Reverse Compiler"))

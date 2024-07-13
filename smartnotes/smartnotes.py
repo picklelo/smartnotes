@@ -15,13 +15,6 @@ def test():
                         sidebar(),
                         min_size=50,
                     ),
-                    rzp.handle(),
-                    rzp.panel(
-                        file_context(),
-                        default_size=25,
-                        min_size=10,
-                    ),
-                    direction="vertical",
                 ),
                 min_size=25,
                 default_size=25,

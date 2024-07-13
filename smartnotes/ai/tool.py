@@ -4,7 +4,6 @@ from typing import Callable
 
 import inspect
 from typing import Any, Dict, Callable
-import pydantic
 
 
 class ToolInvocation(rx.Base):
@@ -53,18 +52,10 @@ class Tool(rx.Base):
             _func=func,
         )
 
-
-def tool(func):
-    print("tool", func)
-    return Tool.from_function(func)
-
-
-@tool
 def send_message(message: str) -> None:
     """Send a final message to the user. This should be done after all internal processing is completed."""
     print(f"Sending message: {message}")
 
-@tool
 def get_temperature(city: str) -> int:
     """Get the temperature of a city."""
     print(f"Getting temperature for {city}")
@@ -73,7 +64,6 @@ def get_temperature(city: str) -> int:
 import io
 import contextlib
 
-@tool
 def run_python_code(code: str) -> str:
     """Run Python code and return the result. Make sure to include the entirety of what's needed, including imports, etc."""
     print(f"Running Python code: {code}")
@@ -82,7 +72,6 @@ def run_python_code(code: str) -> str:
         output = buf.getvalue()
     return output
 
-@tool
 def get_issues():
     import git
 
@@ -97,7 +86,6 @@ def get_issues():
                 )
 
 
-@tool
 def read_journal_entry(date: str) -> str:
     """Reads a journal entry for a given date.
 
