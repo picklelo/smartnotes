@@ -55,10 +55,6 @@ def AIMessage(**kwargs):
     return Message(role="assistant", **kwargs)
 
 
-def ToolMessage(**kwargs):
-    return Message(role="tool", **kwargs)
-
-
 # class UserMessage(Message):
 #     """A message from the user."""
 

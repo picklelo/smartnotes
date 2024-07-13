@@ -164,6 +164,9 @@ def get_issues(project_names: list[str]):
                 project {{
                     name
                 }}
+                cycle {{
+                    id
+                }}
             }}
             pageInfo {{
                 endCursor
@@ -226,6 +229,9 @@ def get_projects(initiative: str | None = None):
     Args:
         initiative: The initiative to filter by.
     """
+    initiative_filter = ""
+    if initiative:
+        initiative_filter = f"initiatives: {{name: {{eq: {initiative} }} }}"
     projects = []
     query = f"""query GetProjects($cursor: String) {{
         projects(
@@ -237,10 +243,7 @@ def get_projects(initiative: str | None = None):
                         nin: ["Canceled", "Completed", "Backlog"]
                     }}
                 }}
-                initiatives: {{
-                    name: {{
-                        eq: "{initiative}"
-                    }}
+                {initiative_filter}
                 }} 
             }}
         ) {{ 
@@ -300,3 +303,76 @@ import json
 
 # print(get_initiatives._func())
 # print(get_milestones._func("Reverse Compiler"))
+
+def get_project_timeline(project_name):
+    """
+    Retrieve the timeline for a specific project, including start date, end date, and major milestones.
+
+    Args:
+        project_name: The name of the project to get the timeline for.
+    
+    Returns:
+        A dictionary containing the project timeline information.
+    """
+    # Implementation details would go here
+    pass
+
+def get_project_dependencies(project_name):
+    """
+    Retrieve the dependencies for a specific project, including related projects or tasks that need to be completed first.
+
+    Args:
+        project_name: The name of the project to get dependencies for.
+    
+    Returns:
+        A list of project or task dependencies for the specified project.
+    """
+    # Implementation details would go here
+    pass
+
+from typing import List, Dict
+def get_team_members(project_name: str) -> List[Dict[str, str]]:
+    """
+    Get all team members assigned to a specific project.
+
+    Args:
+        project_name (str): The name of the project to get team members for.
+    
+    Returns:
+        List[Dict[str, str]]: A list of team members associated with the project.
+                               Each member is represented as a dictionary with 'id', 'name', and 'email' keys.
+    """
+    query = '''
+    query($projectName: String!) {
+      project(name: $projectName) {
+        id
+        name
+        team {
+          members {
+            nodes {
+              id
+              name
+              email
+            }
+          }
+        }
+      }
+    }
+    '''
+    
+    variables = {
+        "projectName": project_name
+    }
+    
+    try:
+        response = make_request({"query": query, "variables": variables})
+        
+        if response.get("data") and response["data"].get("project"):
+            team_members = response["data"]["project"]["team"]["members"]["nodes"]
+            return team_members
+        else:
+            print(f"No project found with name: {project_name}")
+            return []
+    except Exception as e:
+        print(f"An error occurred while fetching team members: {str(e)}")
+        return []
