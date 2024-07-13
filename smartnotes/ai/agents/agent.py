@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 import json
 
 from smartnotes.ai import llm, message
@@ -32,7 +33,9 @@ class Agent:
         if len(self.tools) > 0:
             print("tools")
             print(self.tools)
-            system = f"""{system}
+            system = f"""The current date and time is: {datetime.datetime.now()}.
+
+{system}
 You have the following tools available:
 {"\n".join([json.dumps([tool.dict(exclude={"_func"}) for tool in self.tools], indent=2)])}
 Make sure your response includes only one of these valid tools.
