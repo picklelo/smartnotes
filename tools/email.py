@@ -32,21 +32,6 @@ def get_gmail_service():
     return service
 
 
-# def read_emails():
-#     service = get_gmail_service()
-#     results = service.users().messages().list(userId='me', labelIds=['INBOX']).execute()
-#     messages = results.get('messages', [])
-
-#     if not messages:
-#         print('No messages found.')
-#     else:
-#         print('Messages:')
-#         for message in messages:
-#             msg = service.users().messages().get(userId='me', id=message['id']).execute()
-#             print(f"Subject: {msg['payload']['headers'][0]['value']}")
-#             print(f"Snippet: {msg['snippet']}\n")
-
-
 def read_emails(max_results=10, query=None, label_ids=None):
     service = get_gmail_service()
 

@@ -1,7 +1,7 @@
 import reflex as rx
 from smartnotes.ai.agents.agent import Agent
 from smartnotes.ai.tool import send_message
-from tools import tool_management, websearch, email, coder_tools, python_runner, linear, memories
+from tools import tool_management, websearch, email, coder_tools, python_runner, linear, memories, google_calendar_tool
 
 
 agent = Agent(
@@ -11,6 +11,7 @@ agent = Agent(
         tool_management.read_tool_file,
         tool_management.create_tool,
         tool_management.update_tool,
+        google_calendar_tool.get_calendar_events,
         # coder_tools.update_function_source,
         # coder_tools.add_function_to_file,
         # coder_tools.create_directory,
