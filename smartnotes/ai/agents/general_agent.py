@@ -1,10 +1,18 @@
-import reflex as rx
 from smartnotes.ai.agents.agent import Agent
 from smartnotes.ai.tool import send_message
-from tools import tool_management, websearch, email, coder_tools, python_runner, linear, memories, google_calendar_tool
+from tools import (
+    tool_management,
+    websearch,
+    email,
+    coder_tools,
+    python_runner,
+    linear,
+    memories,
+    google_calendar_tool,
+)
 
 
-agent = Agent(
+general_agent = Agent(
     prompt="""You are a code editing agent to help understand and edit code.""",
     tools=[
         tool_management.list_all_tools,
@@ -18,7 +26,7 @@ agent = Agent(
         # coder_tools.create_file,
         # coder_tools.read_file,
         python_runner.run_python_script,
-        email.read_emails,
+        email.get_emails,
         websearch.search_web,
         websearch.read_webpage,
         linear.get_projects,
@@ -31,5 +39,5 @@ agent = Agent(
         memories.get_journal_entries,
         memories.read_journal_entry,
         send_message,
-    ]
+    ],
 )

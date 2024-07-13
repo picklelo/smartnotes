@@ -4,7 +4,7 @@ import datetime
 import json
 
 from smartnotes.ai import llm, message
-from smartnotes.ai.tool import Tool, ToolInvocation, ToolResponse
+from smartnotes.ai.tool import Tool, ToolInvocation
 from typing import Callable
 
 class Agent:
@@ -77,17 +77,11 @@ The current context is:
             # Invoke the tool.
             try:
                 result = tool._func(**response.params)
-                tool_response = ToolResponse(invocation=response, result=result, error=None)
             except Exception as e:
                 result = str(e)
-                tool_response = ToolResponse(invocation=response, result=None, error=result)
-            # self.scratchpad.append(tool_response)
             user_message = message.UserMessage(content=f"Tool invocation response: {result}")
             messages.append(user_message)
             yield user_message
-        # async for ai_message in self.llm.stream_chat_response(messages, system=system):
-        #     messages[-1] = ai_message
-        #     yield ai_message
 
     async def get_response(self, messages: list[message.Message]):
         system = self.get_system_message()

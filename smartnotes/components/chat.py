@@ -7,6 +7,8 @@ from smartnotes.ai.message import (
 from sqlmodel import select
 from smartnotes.components.file_context import ContextState
 from smartnotes.ai.agents import agent
+from smartnotes.ai.agents.general_agent import general_agent
+from smartnotes.ai.agents.email_agent import email_agent
 
 DEFAULT_CONVERSATIION_NAME = "Chat"
 
@@ -87,7 +89,6 @@ class ChatState(rx.State):
         # )
         yield
 
-        from a import agent as context_agent
 
         context_state = await self.get_state(ContextState)
         # context_agent = agent.ContextAgent(
@@ -101,8 +102,10 @@ class ChatState(rx.State):
         #         linear.get_component_docs,
         #     ]
         # )
+        # agent = general_agent
+        agent = email_agent
         message_index = len(self.messages) - 1
-        async for message in context_agent.stream(self.messages.copy()):
+        async for message in agent.stream(self.messages.copy()):
             message.conversation_id = self.current_conversation.id
             self.messages.append(message)
             yield

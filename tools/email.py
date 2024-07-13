@@ -21,7 +21,7 @@ def get_gmail_service():
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
-                "credentials1.json", SCOPES
+                "credentials.json", SCOPES
             )
             creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
@@ -32,7 +32,7 @@ def get_gmail_service():
     return service
 
 
-def read_emails(max_results=10, query=None, label_ids=None):
+def get_emails(max_results=10, query=None, label_ids=None):
     service = get_gmail_service()
 
     # Prepare the request parameters
