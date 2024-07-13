@@ -1,7 +1,6 @@
 import os
 import json
 from typing import List, Dict
-from smartnotes.ai.tool import tool
 
 BASE_MEMORY_DIR = "memories"
 
@@ -54,3 +53,34 @@ def list_memories(start: str = "", depth: int = -1) -> List[Dict[str, str]]:
             results.append({"key": key, "preview": preview})
 
     return results
+
+def get_journal_entries() -> List[str]:
+    """Get a list of all journal entries."""
+    entries = []
+    for root, dirs, files in os.walk("/Users/nikhil/Documents/Vault/journal"):
+        for file in files:
+            if file.endswith('.md'):
+                entries.append(file[:-3])
+    return entries
+
+def read_journal_entry(date: str) -> str:
+    """Reads a journal entry for a given date.
+
+    Args:
+        date (str): The date in the format 'YYYY-MM-DD'.
+
+    Returns:
+        str: The content of the journal entry or an error message if the file does not exist.
+    """
+    print(date)
+    year, month_day = date.split("-")[:2]
+    file_path = (
+        f"/Users/nikhil/Documents/Vault/journal/{year}/{year}-{month_day}/{date}.md"
+    )
+
+    try:
+        print("open", file_path)
+        with open(file_path, "r") as file:
+            return file.read()
+    except FileNotFoundError:
+        return "Journal entry not found for the specified date."
